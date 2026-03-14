@@ -1,0 +1,106 @@
+<div class="page-content">
+  <form class="contract-form" (ngSubmit)="onSubmit()" [formGroup]="personsForm">
+    <div class="form-group">
+      <label for="template-select" class="form-label">
+        Seleccione la plantilla de contrato
+      </label>
+      <select
+        id="template-select"
+        name="template"
+        class="form-select"
+        [(ngModel)]="selectedTemplate"
+        [ngModelOptions]="{standalone: true}"
+      >
+        <option value="" disabled>Seleccione una opción</option>
+        @for (template of templates; track template) {
+          <option [value]="template">{{ template }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="contract-date" class="form-label">Fecha del contrato</label>
+      <input
+        id="contract-date"
+        type="date"
+        class="form-input"
+        formControlName="contractDate"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="contract-number" class="form-label">Numero de contrato</label>
+      <input
+        id="contract-number"
+        type="text"
+        class="form-input"
+        formControlName="contractNumber"
+        placeholder="Ej: 2026-001"
+      />
+    </div>
+
+    <div class="persons-section">
+      <h3 class="section-title">Arrendatarios</h3>
+      <div formArrayName="persons">
+        @for (person of persons.controls; track $index) {
+          <div class="person-card" [formGroupName]="$index">
+            <div class="person-header">
+              <span class="person-number">Arrendatario {{ $index + 1 }}</span>
+              @if (persons.length > 1) {
+                <button type="button" class="btn-remove" (click)="removePerson($index)">
+                  Eliminar
+                </button>
+              }
+            </div>
+            <div class="form-group">
+              <label class="form-label">Nombre Completo</label>
+              <input
+                type="text"
+                class="form-input"
+                formControlName="nombreCompleto"
+                placeholder="Nombre completo"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Tipo de documento</label>
+              <select class="form-select" formControlName="tipoDocumento">
+                <option value="" disabled>Seleccione una opción</option>
+                @for (docType of documentTypes; track docType) {
+                  <option [value]="docType">{{ docType }}</option>
+                }
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Documento</label>
+              <input
+                type="text"
+                class="form-input"
+                formControlName="documento"
+                placeholder="Número de documento"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Lugar de expedición</label>
+              <input
+                type="text"
+                class="form-input"
+                formControlName="lugarExpedicion"
+                placeholder="Lugar de expedición"
+              />
+            </div>
+          </div>
+        }
+      </div>
+      <button type="button" class="btn-add" (click)="addPerson()">
+        Agregar otra persona
+      </button>
+    </div>
+
+    <button type="submit" class="btn-submit" [disabled]="!selectedTemplate || isSubmitting">
+      {{ isSubmitting ? 'Enviando...' : 'Generar contrato' }}
+    </button>
+    @if (message) {
+      <p class="form-message">{{ message }}</p>
+    }
+  </form>
+</div>

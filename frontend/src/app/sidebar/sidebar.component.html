@@ -1,0 +1,19 @@
+<nav class="sidebar">
+  <div class="sidebar-header">
+    <h2 class="logo">Te Arrendamos</h2>
+  </div>
+  <ul class="nav-list">
+    @for (item of navItems; track item.route) {
+      <li>
+        <a
+          [routerLink]="item.route"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: false }"
+          class="nav-link"
+        >
+          {{ item.label }}
+        </a>
+      </li>
+    }
+  </ul>
+</nav>
