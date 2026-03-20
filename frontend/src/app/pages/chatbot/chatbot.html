@@ -1,0 +1,24 @@
+<div class="chatbot-container">
+    <h2>Chatbot (Testing)</h2>
+  
+    <div class="messages">
+      <div *ngFor="let msg of messages" [ngClass]="msg.role">
+        <strong>{{ msg.role }}:</strong> {{ msg.content }}
+      </div>
+  
+      <div *ngIf="isLoading">Thinking...</div>
+    </div>
+  
+    <div class="input-container">
+      <input
+        [(ngModel)]="userInput"
+        (keyup.enter)="sendMessage()"
+        placeholder="Ask for properties..."
+      />
+      <button (click)="sendMessage()">Send</button>
+    </div>
+  
+    <div *ngIf="errorMessage" class="error">
+      {{ errorMessage }}
+    </div>
+  </div>

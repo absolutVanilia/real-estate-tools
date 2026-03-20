@@ -13,6 +13,7 @@ export class SidebarComponent {
   navItems = [
     { label: 'Contratos', route: '/contratos' },
     { label: 'Citas', route: '/citas' },
-    { label: 'Propiedades activas', route: '/propiedades-activas' }
+    { label: 'Propiedades activas', route: '/propiedades-activas' },
+    { label: 'chatbot', route: '/chatbot' }
   ];
 }
