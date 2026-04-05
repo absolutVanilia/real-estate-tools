@@ -1,0 +1,393 @@
+<div class="usuarios">
+  <!-- Header -->
+  <header class="page-header">
+    <div class="page-header__info">
+      <h1 class="page-header__title">Gestión de usuarios</h1>
+      <p class="page-header__desc">Administra los usuarios y sus roles dentro de la plataforma</p>
+    </div>
+    @if (canManageUsers) {
+      <button class="btn btn--primary" (click)="toggleForm()">
+        @if (showForm()) {
+          <svg lucideX class="icon-16"></svg>
+        } @else {
+          <svg lucideUserPlus class="icon-16"></svg>
+        }
+        <span>{{ showForm() ? 'Cancelar' : 'Nuevo usuario' }}</span>
+      </button>
+    }
+  </header>
+
+  <!-- Formulario crear / editar -->
+  @if (canManageUsers && showForm()) {
+    <form class="card card--form" [formGroup]="userForm" (ngSubmit)="onSubmitUser()">
+      <div class="card__header">
+        <h2 class="card__title">
+          @if (isEditing()) {
+            <svg lucideUserCog class="icon-18 icon-accent"></svg>
+            Editar usuario
+          } @else {
+            <svg lucideUserPlus class="icon-18 icon-accent"></svg>
+            Nuevo usuario
+          }
+        </h2>
+      </div>
+
+      <div class="card__body">
+        <div class="form-grid">
+          <!-- Nombre -->
+          <div class="form-group">
+            <label class="form-label" for="firstName">Nombre</label>
+            <input
+              class="form-input"
+              type="text"
+              id="firstName"
+              formControlName="first_name"
+              placeholder="Ej: Juan"
+              autocomplete="given-name"
+            />
+            @if (userForm.get('first_name')?.touched && userForm.get('first_name')?.hasError('required')) {
+              <span class="form-error">El nombre es obligatorio</span>
+            }
+          </div>
+
+          <!-- Apellido -->
+          <div class="form-group">
+            <label class="form-label" for="lastName">Apellido</label>
+            <input
+              class="form-input"
+              type="text"
+              id="lastName"
+              formControlName="last_name"
+              placeholder="Ej: Pérez"
+              autocomplete="family-name"
+            />
+            @if (userForm.get('last_name')?.touched && userForm.get('last_name')?.hasError('required')) {
+              <span class="form-error">El apellido es obligatorio</span>
+            }
+          </div>
+
+          <!-- Usuario -->
+          <div class="form-group">
+            <label class="form-label" for="username">Nombre de usuario</label>
+            <input
+              class="form-input"
+              type="text"
+              id="username"
+              formControlName="username"
+              placeholder="Ej: jperez"
+              autocomplete="username"
+            />
+            @if (userForm.get('username')?.touched && userForm.get('username')?.hasError('required')) {
+              <span class="form-error">El usuario es obligatorio</span>
+            }
+          </div>
+
+          <!-- Contraseña -->
+          <div class="form-group">
+            <label class="form-label" for="password">
+              Contraseña
+              @if (isEditing()) {
+                <span class="form-hint">(dejar vacío para mantener)</span>
+              }
+            </label>
+            <input
+              class="form-input"
+              type="password"
+              id="password"
+              formControlName="password"
+              placeholder="Mínimo 8 caracteres"
+              autocomplete="new-password"
+            />
+            @if (userForm.get('password')?.touched && userForm.get('password')?.hasError('minlength')) {
+              <span class="form-error">Mínimo 8 caracteres</span>
+            }
+          </div>
+
+          <!-- Rol -->
+          <div class="form-group">
+            <label class="form-label" for="role">Rol</label>
+            <select class="form-select" id="role" formControlName="role">
+              @for (role of roles; track role) {
+                <option [value]="role">{{ role === 'admin' ? 'Administrador' : 'Promotor' }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Compañía (solo platform admin) -->
+          @if (isPlatformAdmin) {
+            <div class="form-group">
+              <label class="form-label" for="company">
+                <svg lucideBuilding2 class="icon-14 icon-inline"></svg>
+                Compañía
+              </label>
+              <select class="form-select" id="company" formControlName="company">
+                <option [ngValue]="null" disabled>Seleccione una compañía</option>
+                @for (c of companies(); track c.id) {
+                  <option [ngValue]="c.id">{{ c.name }}</option>
+                }
+              </select>
+              @if (userForm.get('company')?.touched && userForm.get('company')?.hasError('required')) {
+                <span class="form-error">La compañía es obligatoria</span>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="card__actions">
+        <button type="button" class="btn btn--ghost" (click)="cancelEdit()">Cancelar</button>
+        <button type="submit" class="btn btn--primary" [disabled]="userForm.invalid">
+          <svg lucideCheck class="icon-15"></svg>
+          {{ isEditing() ? 'Actualizar usuario' : 'Crear usuario' }}
+        </button>
+      </div>
+    </form>
+  }
+
+  <!-- Listado -->
+  <div class="card">
+    <div class="card__header">
+      <h2 class="card__title">
+        <svg lucideUsers class="icon-18 icon-accent"></svg>
+        Usuarios
+        <span class="badge">{{ users().length }}</span>
+      </h2>
+      <div class="search-box">
+        <svg lucideSearch class="search-box__icon"></svg>
+        <input
+          class="search-box__input"
+          type="text"
+          placeholder="Buscar usuario..."
+          [ngModel]="searchTerm()"
+          (ngModelChange)="searchTerm.set($event)"
+        />
+      </div>
+    </div>
+
+    <!-- Loading -->
+    @if (isLoading()) {
+      <div class="table-empty">
+        <p>Cargando usuarios...</p>
+      </div>
+    }
+
+    @if (!isLoading()) {
+      <!-- Tabla desktop -->
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Usuario</th>
+              <th>Nombre de usuario</th>
+              <th class="text-center">Rol</th>
+              @if (isPlatformAdmin) {
+                <th>Compañía</th>
+              }
+              <th class="text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (user of filteredUsers(); track user.id) {
+              <tr [class.row--deleting]="deletingUserId() === user.id">
+                <td>
+                  <div class="user-cell">
+                    <span class="avatar">{{ getInitials(user) }}</span>
+                    <div class="user-cell__info">
+                      <span class="user-cell__name">{{ user.first_name }} {{ user.last_name }}</span>
+                      <span class="user-cell__id">#{{ user.id }}</span>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="username-chip">&#64;{{ user.username }}</span>
+                </td>
+                <td class="text-center">
+                  <span
+                    class="role-badge"
+                    [class.role-badge--admin]="user.role === 'admin'"
+                    [class.role-badge--promotor]="user.role === 'promotor'"
+                  >
+                    {{ user.role === 'admin' ? 'Admin' : 'Promotor' }}
+                  </span>
+                </td>
+                @if (isPlatformAdmin) {
+                  <td>
+                    <span class="company-tag">
+                      <svg lucideBuilding2 class="icon-13"></svg>
+                      {{ getCompanyName(user.company) }}
+                    </span>
+                  </td>
+                }
+                <td class="text-center">
+                  @if (canManageUsers) {
+                    <!-- Confirmación de eliminación -->
+                    @if (deletingUserId() === user.id) {
+                      <div class="confirm-delete">
+                        <span class="confirm-delete__text">¿Eliminar?</span>
+                        <button
+                          type="button"
+                          class="btn-icon btn-icon--danger"
+                          (click)="deleteUser(user.id)"
+                          title="Confirmar eliminación"
+                        >
+                          <svg lucideCheck class="icon-14"></svg>
+                        </button>
+                        <button
+                          type="button"
+                          class="btn-icon btn-icon--ghost"
+                          (click)="cancelDelete()"
+                          title="Cancelar"
+                        >
+                          <svg lucideX class="icon-14"></svg>
+                        </button>
+                      </div>
+                    } @else {
+                      <div class="action-buttons">
+                        <button
+                          type="button"
+                          class="btn-icon btn-icon--edit"
+                          (click)="editUser(user)"
+                          title="Editar usuario"
+                        >
+                          <svg lucidePencil class="icon-14"></svg>
+                        </button>
+                        <button
+                          type="button"
+                          class="btn-icon btn-icon--danger"
+                          (click)="confirmDelete(user.id)"
+                          title="Eliminar usuario"
+                        >
+                          <svg lucideTrash2 class="icon-14"></svg>
+                        </button>
+                      </div>
+                    }
+                  } @else if (isPromotor) {
+                    <span class="readonly-badge">
+                      <svg lucideEye class="icon-13"></svg>
+                      Lectura
+                    </span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+
+        @if (filteredUsers().length === 0 && users().length > 0) {
+          <div class="table-empty">
+            <p>No se encontraron usuarios que coincidan con la búsqueda.</p>
+          </div>
+        }
+
+        @if (users().length === 0 && !isLoading()) {
+          <div class="table-empty">
+            <p>No hay usuarios registrados aún.</p>
+          </div>
+        }
+      </div>
+
+      <!-- Cards móvil -->
+      <div class="mobile-list">
+        @for (user of filteredUsers(); track user.id) {
+          <div class="mobile-item" [class.mobile-item--deleting]="deletingUserId() === user.id">
+            <div class="mobile-item__top">
+              <div class="mobile-item__identity">
+                <span class="avatar avatar--sm">{{ getInitials(user) }}</span>
+                <div>
+                  <p class="mobile-item__name">{{ user.first_name }} {{ user.last_name }}</p>
+                  <p class="mobile-item__username">&#64;{{ user.username }}</p>
+                </div>
+              </div>
+              <span
+                class="role-badge"
+                [class.role-badge--admin]="user.role === 'admin'"
+                [class.role-badge--promotor]="user.role === 'promotor'"
+              >
+                {{ user.role === 'admin' ? 'Admin' : 'Promotor' }}
+              </span>
+            </div>
+
+            <div class="mobile-item__meta">
+              @if (isPlatformAdmin) {
+                <span class="company-tag">
+                  <svg lucideBuilding2 class="icon-13"></svg>
+                  {{ getCompanyName(user.company) }}
+                </span>
+              }
+              <span class="mobile-item__id">#{{ user.id }}</span>
+            </div>
+
+            @if (canManageUsers) {
+              <div class="mobile-item__actions">
+                @if (deletingUserId() === user.id) {
+                  <div class="confirm-delete confirm-delete--mobile">
+                    <span class="confirm-delete__text">¿Eliminar este usuario?</span>
+                    <div class="confirm-delete__buttons">
+                      <button
+                        type="button"
+                        class="btn btn--danger btn--sm"
+                        (click)="deleteUser(user.id)"
+                      >
+                        Eliminar
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn--ghost btn--sm"
+                        (click)="cancelDelete()"
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  </div>
+                } @else {
+                  <button
+                    type="button"
+                    class="btn btn--ghost btn--sm"
+                    (click)="editUser(user)"
+                  >
+                    <svg lucidePencil class="icon-13"></svg>
+                    Editar
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn--danger-ghost btn--sm"
+                    (click)="confirmDelete(user.id)"
+                  >
+                    <svg lucideTrash2 class="icon-13"></svg>
+                    Eliminar
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        }
+
+        @if (filteredUsers().length === 0 && users().length > 0) {
+          <div class="table-empty">
+            <p>No se encontraron usuarios.</p>
+          </div>
+        }
+
+        @if (users().length === 0 && !isLoading()) {
+          <div class="table-empty">
+            <p>No hay usuarios registrados aún.</p>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Toasts -->
+  @if (message()) {
+    <div class="toast toast--success" role="status">
+      <svg lucideCircleCheck class="icon-17"></svg>
+      <span>{{ message() }}</span>
+    </div>
+  }
+  @if (error()) {
+    <div class="toast toast--error" role="alert">
+      <svg lucideCircleX class="icon-17"></svg>
+      <span>{{ error() }}</span>
+    </div>
+  }
+</div>
