@@ -1,0 +1,51 @@
+// ─── Variables ───
+$sidebar-w: 252px;
+$sidebar-collapsed-w: 68px;
+$ease: cubic-bezier(0.4, 0, 0.2, 1);
+$bg: #f8f9fa;
+
+:host {
+  display: block;
+  height: 100%;
+}
+
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+  background: $bg;
+}
+
+.main-content {
+  flex: 1;
+  margin-left: $sidebar-w;
+  min-height: 100vh;
+  background: $bg;
+  transition: margin-left 0.3s $ease;
+}
+
+// ─── Sidebar colapsado ───
+.app-layout--collapsed .main-content {
+  margin-left: $sidebar-collapsed-w;
+}
+
+// ─── Tablet: sidebar siempre colapsado ───
+@media (max-width: 1024px) {
+  .main-content {
+    margin-left: $sidebar-collapsed-w;
+  }
+
+  .app-layout--collapsed .main-content {
+    margin-left: $sidebar-collapsed-w;
+  }
+}
+
+// ─── Móvil: sidebar es drawer, sin margen ───
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+  }
+
+  .app-layout--collapsed .main-content {
+    margin-left: 0;
+  }
+}
