@@ -1,0 +1,198 @@
+<div class="companies">
+  <!-- Header -->
+  <header class="page-header">
+    <div class="page-header__info">
+      <h1 class="page-header__title">Compañías</h1>
+      <p class="page-header__desc">Gestiona las compañías registradas en la plataforma</p>
+    </div>
+    @if (isPlatformAdmin()) {
+      <button class="btn btn--primary" (click)="toggleForm()">
+        @if (showForm()) {
+          <svg lucideX class="icon-16"></svg>
+        } @else {
+          <svg lucidePlus class="icon-16"></svg>
+        }
+        <span>{{ showForm() ? 'Cancelar' : 'Nueva compañía' }}</span>
+      </button>
+    }
+  </header>
+
+  <!-- Sin permisos -->
+  @if (!isPlatformAdmin()) {
+    <div class="empty-state">
+      <div class="empty-state__icon-wrap">
+        <svg lucideLock class="icon-40"></svg>
+      </div>
+      <h3 class="empty-state__title">Acceso restringido</h3>
+      <p class="empty-state__text">Solo el administrador de plataforma puede gestionar compañías.</p>
+    </div>
+  } @else {
+
+    <!-- Formulario -->
+    @if (showForm()) {
+      <form class="card card--form" [formGroup]="companyForm" (ngSubmit)="onSubmit()">
+        <div class="card__header">
+          <h2 class="card__title">
+            <svg lucideBuilding2 class="icon-18 icon-accent"></svg>
+            Nueva compañía
+          </h2>
+        </div>
+        <div class="card__body">
+          <div class="form-group">
+            <label class="form-label" for="companyName">Nombre de la compañía</label>
+            <input
+              class="form-input"
+              type="text"
+              id="companyName"
+              formControlName="name"
+              placeholder="Ej: Acme Corporation"
+              autocomplete="off"
+            />
+            @if (companyForm.get('name')?.touched && companyForm.get('name')?.hasError('required')) {
+              <span class="form-error">El nombre es obligatorio</span>
+            }
+          </div>
+        </div>
+        <div class="card__actions">
+          <button type="button" class="btn btn--ghost" (click)="showForm.set(false)">Cancelar</button>
+          <button type="submit" class="btn btn--primary" [disabled]="companyForm.invalid">
+            <svg lucideCheck class="icon-15"></svg>
+            Crear compañía
+          </button>
+        </div>
+      </form>
+    }
+
+    <!-- Listado -->
+    <div class="card">
+      <div class="card__header">
+        <h2 class="card__title">
+          Listado
+          <span class="badge">{{ companies().length }}</span>
+        </h2>
+        <div class="search-box">
+          <svg lucideSearch class="search-box__icon"></svg>
+          <input
+            class="search-box__input"
+            type="text"
+            placeholder="Buscar compañía..."
+            [ngModel]="searchTerm()"
+            (ngModelChange)="searchTerm.set($event)"
+          />
+        </div>
+      </div>
+
+      <!-- Loading -->
+      @if (isLoading()) {
+        <div class="table-empty">
+          <p>Cargando compañías...</p>
+        </div>
+      }
+
+      <!-- Tabla desktop -->
+      @if (!isLoading()) {
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th class="text-center">Activa</th>
+                <th>Creada</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (c of filteredCompanies(); track c.id) {
+                <tr>
+                  <td><span class="id-chip">#{{ c.id }}</span></td>
+                  <td>
+                    <div class="company-cell">
+                      <span class="avatar">{{ c.name.charAt(0).toUpperCase() }}</span>
+                      <span class="company-name">{{ c.name }}</span>
+                    </div>
+                  </td>
+                  <td class="text-center">
+                    <span
+                      class="status"
+                      [class.status--active]="c.is_active"
+                      [class.status--inactive]="!c.is_active"
+                    >
+                      {{ c.is_active ? 'Activa' : 'Inactiva' }}
+                    </span>
+                  </td>
+                  <td class="date-cell">{{ c.created_at | date: 'mediumDate' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+
+          @if (filteredCompanies().length === 0 && companies().length > 0) {
+            <div class="table-empty">
+              <p>No se encontraron compañías que coincidan con la búsqueda.</p>
+            </div>
+          }
+
+          @if (companies().length === 0 && !isLoading()) {
+            <div class="table-empty">
+              <p>No hay compañías registradas aún.</p>
+            </div>
+          }
+        </div>
+
+        <!-- Cards móvil -->
+        <div class="mobile-list">
+          @for (c of filteredCompanies(); track c.id) {
+            <div class="mobile-item">
+              <div class="mobile-item__top">
+                <div class="mobile-item__identity">
+                  <span class="avatar avatar--sm">{{ c.name.charAt(0).toUpperCase() }}</span>
+                  <div>
+                    <p class="mobile-item__name">{{ c.name }}</p>
+                    <p class="mobile-item__id">#{{ c.id }}</p>
+                  </div>
+                </div>
+                <span
+                  class="status"
+                  [class.status--active]="c.is_active"
+                  [class.status--inactive]="!c.is_active"
+                >
+                  {{ c.is_active ? 'Activa' : 'Inactiva' }}
+                </span>
+              </div>
+              <div class="mobile-item__bottom">
+                <svg lucideCalendarDays class="icon-13"></svg>
+                <span>{{ c.created_at | date: 'mediumDate' }}</span>
+              </div>
+            </div>
+          }
+
+          @if (filteredCompanies().length === 0 && companies().length > 0) {
+            <div class="table-empty">
+              <p>No se encontraron compañías que coincidan con la búsqueda.</p>
+            </div>
+          }
+
+          @if (companies().length === 0 && !isLoading()) {
+            <div class="table-empty">
+              <p>No hay compañías registradas aún.</p>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Toasts -->
+  @if (message()) {
+    <div class="toast toast--success" role="status">
+      <svg lucideCircleCheck class="icon-17"></svg>
+      <span>{{ message() }}</span>
+    </div>
+  }
+  @if (error()) {
+    <div class="toast toast--error" role="alert">
+      <svg lucideCircleX class="icon-17"></svg>
+      <span>{{ error() }}</span>
+    </div>
+  }
+</div>
