@@ -1,9 +1,15 @@
 .sidebar {
+  display: flex;
+  flex-direction: column;
   width: 240px;
   min-height: 100vh;
   background-color: #2e2f6e;
   padding: 1.5rem 0;
   box-sizing: border-box;
+}
+
+.sidebar-body {
+  flex: 1;
 }
 
 .sidebar-header {
@@ -18,6 +24,22 @@
   font-weight: 600;
   color: #fff;
   letter-spacing: -0.02em;
+}
+
+.nav-section {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.nav-section-title {
+  margin: 0 0 0.75rem;
+  padding: 0 1.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
 }
 
 .nav-list {
@@ -47,5 +69,26 @@
     background-color: rgba(255, 255, 255, 0.15);
     color: #fff;
     font-weight: 500;
+  }
+}
+
+.sidebar-footer {
+  padding: 1rem 1.5rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.btn-logout {
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 8px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.1);
   }
 }

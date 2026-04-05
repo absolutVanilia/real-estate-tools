@@ -1,19 +1,47 @@
 <nav class="sidebar">
-  <div class="sidebar-header">
-    <h2 class="logo">Te Arrendamos</h2>
-  </div>
-  <ul class="nav-list">
-    @for (item of navItems; track item.route) {
-      <li>
-        <a
-          [routerLink]="item.route"
-          routerLinkActive="active"
-          [routerLinkActiveOptions]="{ exact: false }"
-          class="nav-link"
-        >
-          {{ item.label }}
-        </a>
-      </li>
+  <div class="sidebar-body">
+    <div class="sidebar-header">
+      <h2 class="logo">Te Arrendamos</h2>
+    </div>
+    <ul class="nav-list">
+      @for (item of navItems; track item.route) {
+        <li>
+          <a
+            [routerLink]="item.route"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: false }"
+            class="nav-link"
+          >
+            {{ item.label }}
+          </a>
+        </li>
+      }
+    </ul>
+
+    @if (showAdministration) {
+      <div class="nav-section">
+        <p class="nav-section-title">Administración</p>
+        <ul class="nav-list">
+          @for (item of adminItems; track item.route) {
+            @if (!item.platformOnly || isPlatformAdmin) {
+              <li>
+                <a
+                  [routerLink]="item.route"
+                  routerLinkActive="active"
+                  [routerLinkActiveOptions]="{ exact: false }"
+                  class="nav-link"
+                >
+                  {{ item.label }}
+                </a>
+              </li>
+            }
+          }
+        </ul>
+      </div>
     }
-  </ul>
+  </div>
+
+  <div class="sidebar-footer">
+    <button type="button" class="btn-logout" (click)="logout()">Cerrar sesión</button>
+  </div>
 </nav>
