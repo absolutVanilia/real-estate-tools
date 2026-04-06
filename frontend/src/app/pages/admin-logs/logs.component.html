@@ -1,0 +1,400 @@
+<div class="logs">
+    <!-- Header -->
+    <header class="page-header">
+      <div class="page-header__info">
+        <h1 class="page-header__title">
+          <svg lucideActivity class="icon-24 icon-accent"></svg>
+          Registro de actividad
+        </h1>
+        <p class="page-header__desc">
+          @if (isPlatformAdmin()) {
+            Historial completo de todas las acciones en la plataforma
+          } @else {
+            Historial de acciones en tu compañía
+          }
+        </p>
+      </div>
+  
+      @if (hasAccess()) {
+        <div class="page-header__actions">
+          <button
+            class="btn btn--ghost btn--icon-only"
+            (click)="loadLogs()"
+            title="Recargar"
+            [disabled]="isLoading()"
+          >
+            <svg lucideRefreshCw class="icon-16" [class.spin]="isLoading()"></svg>
+          </button>
+        </div>
+      }
+    </header>
+  
+    <!-- Sin acceso -->
+    @if (!hasAccess()) {
+      <div class="empty-state">
+        <div class="empty-state__icon-wrap">
+          <svg lucideShieldAlert class="icon-40"></svg>
+        </div>
+        <h3 class="empty-state__title">Acceso restringido</h3>
+        <p class="empty-state__text">
+          Solo los administradores pueden ver el registro de actividad.
+        </p>
+      </div>
+    } @else {
+      <!-- Barra de búsqueda y filtros -->
+      <div class="toolbar">
+        <div class="toolbar__search">
+          <svg lucideSearch class="toolbar__search-icon"></svg>
+          <input
+            class="toolbar__search-input"
+            type="text"
+            placeholder="Buscar en los logs..."
+            [ngModel]="searchTerm()"
+            (ngModelChange)="onSearchChange($event)"
+          />
+          @if (searchTerm()) {
+            <button class="toolbar__search-clear" (click)="onSearchChange('')">
+              <svg lucideX class="icon-14"></svg>
+            </button>
+          }
+        </div>
+  
+        <button
+          class="btn btn--ghost"
+          (click)="toggleFilters()"
+          [class.btn--active]="showFilters() || activeFiltersCount() > 0"
+        >
+          <svg lucideFilter class="icon-15"></svg>
+          Filtros
+          @if (activeFiltersCount() > 0) {
+            <span class="filter-count">{{ activeFiltersCount() }}</span>
+          }
+        </button>
+      </div>
+  
+      <!-- Panel de filtros -->
+      @if (showFilters()) {
+        <div class="filters-panel">
+          <div class="filters-panel__grid">
+            <!-- Acción -->
+            <div class="form-group">
+              <label class="form-label">Acción</label>
+              <select
+                class="form-select"
+                [ngModel]="filterAction()"
+                (ngModelChange)="onFilterActionChange($event)"
+              >
+                <option value="">Todas</option>
+                @for (action of availableActions(); track action) {
+                  <option [value]="action">{{ getActionLabel(action) }}</option>
+                }
+              </select>
+            </div>
+  
+            <!-- Recurso -->
+            <div class="form-group">
+              <label class="form-label">Tipo de recurso</label>
+              <select
+                class="form-select"
+                [ngModel]="filterResourceType()"
+                (ngModelChange)="onFilterResourceTypeChange($event)"
+              >
+                <option value="">Todos</option>
+                @for (rt of availableResourceTypes(); track rt) {
+                  <option [value]="rt">{{ getResourceTypeLabel(rt) }}</option>
+                }
+              </select>
+            </div>
+  
+            <!-- Fecha desde -->
+            <div class="form-group">
+              <label class="form-label">Desde</label>
+              <input
+                class="form-input"
+                type="date"
+                [ngModel]="filterDateFrom()"
+                (ngModelChange)="onFilterDateFromChange($event)"
+              />
+            </div>
+  
+            <!-- Fecha hasta -->
+            <div class="form-group">
+              <label class="form-label">Hasta</label>
+              <input
+                class="form-input"
+                type="date"
+                [ngModel]="filterDateTo()"
+                (ngModelChange)="onFilterDateToChange($event)"
+              />
+            </div>
+          </div>
+  
+          @if (activeFiltersCount() > 0) {
+            <button class="btn btn--link" (click)="clearFilters()">
+              <svg lucideX class="icon-14"></svg>
+              Limpiar filtros
+            </button>
+          }
+        </div>
+      }
+  
+      <!-- Contador de resultados -->
+      <div class="results-info">
+        <span class="results-info__count">
+          {{ totalCount() }} {{ totalCount() === 1 ? 'registro' : 'registros' }}
+        </span>
+        @if (searchTerm() || activeFiltersCount() > 0) {
+          <span class="results-info__filtered">
+            (filtrado)
+          </span>
+        }
+      </div>
+  
+      <!-- Loading -->
+      @if (isLoading()) {
+        <div class="card">
+          <div class="loading-state">
+            <svg lucideRefreshCw class="icon-20 spin"></svg>
+            <p>Cargando registros...</p>
+          </div>
+        </div>
+      }
+  
+      <!-- Lista de logs (Desktop) -->
+      @if (!isLoading()) {
+        <div class="logs-list">
+          @for (log of logs(); track log.id) {
+            <div
+              class="log-entry"
+              [class.log-entry--expanded]="isExpanded(log.id)"
+            >
+              <!-- Fila principal -->
+              <div class="log-entry__main" (click)="toggleExpand(log.id)">
+                <!-- Indicador de acción -->
+                <div
+                  class="log-entry__action-icon"
+                  [class]="'log-entry__action-icon--' + log.action.toLowerCase()"
+                >
+                  @switch (log.action) {
+                    @case ('CREATE') {
+                      <svg lucidePlus class="icon-16"></svg>
+                    }
+                    @case ('UPDATE') {
+                      <svg lucidePencil class="icon-16"></svg>
+                    }
+                    @case ('DELETE') {
+                      <svg lucideTrash2 class="icon-16"></svg>
+                    }
+                    @case ('LOGIN') {
+                      <svg lucideLogIn class="icon-16"></svg>
+                    }
+                    @case ('LOGOUT') {
+                      <svg lucideLogOut class="icon-16"></svg>
+                    }
+                    @default {
+                      <svg lucideInfo class="icon-16"></svg>
+                    }
+                  }
+                </div>
+  
+                <!-- Contenido -->
+                <div class="log-entry__content">
+                  <p class="log-entry__description">{{ log.description }}</p>
+                  <div class="log-entry__meta">
+                    <span class="log-entry__user">
+                      <svg lucideUser class="icon-12"></svg>
+                      {{ log.user_display || 'Sistema' }}
+                    </span>
+                    <span class="log-entry__time">
+                      <svg lucideClock class="icon-12"></svg>
+                      {{ log.created_at | date: 'dd MMM yyyy, HH:mm' }}
+                    </span>
+                  </div>
+                </div>
+  
+                <!-- Tags & badges -->
+                <div class="log-entry__badges">
+                  <span
+                    class="action-badge"
+                    [class]="'action-badge--' + log.action.toLowerCase()"
+                  >
+                    {{ getActionLabel(log.action) }}
+                  </span>
+                  <span class="resource-badge">
+                    {{ getResourceTypeLabel(log.resource_type) }}
+                  </span>
+                </div>
+  
+                <!-- Expand icon -->
+                <button class="log-entry__expand" aria-label="Expandir detalles">
+                  @if (isExpanded(log.id)) {
+                    <svg lucideChevronUp class="icon-16"></svg>
+                  } @else {
+                    <svg lucideChevronDown class="icon-16"></svg>
+                  }
+                </button>
+              </div>
+  
+              <!-- Detalles expandidos -->
+              @if (isExpanded(log.id)) {
+                <div class="log-entry__details">
+                  <!-- Información general -->
+                  <div class="detail-grid">
+                    <div class="detail-item">
+                      <span class="detail-item__label">
+                        <svg lucideHash class="icon-12"></svg> ID
+                      </span>
+                      <span class="detail-item__value">#{{ log.id }}</span>
+                    </div>
+  
+                    <div class="detail-item">
+                      <span class="detail-item__label">
+                        <svg lucideFileText class="icon-12"></svg> Recurso
+                      </span>
+                      <span class="detail-item__value">
+                        {{ getResourceTypeLabel(log.resource_type) }}
+                        @if (log.resource_id) {
+                          <span class="detail-item__sub">#{{ log.resource_id }}</span>
+                        }
+                        @if (log.resource_display) {
+                          — {{ log.resource_display }}
+                        }
+                      </span>
+                    </div>
+  
+                    @if (log.ip_address) {
+                      <div class="detail-item">
+                        <span class="detail-item__label">
+                          <svg lucideGlobe class="icon-12"></svg> IP
+                        </span>
+                        <span class="detail-item__value detail-item__value--mono">
+                          {{ log.ip_address }}
+                        </span>
+                      </div>
+                    }
+  
+                    @if (log.user_agent) {
+                      <div class="detail-item">
+                        <span class="detail-item__label">
+                          <svg lucideMonitor class="icon-12"></svg> Dispositivo
+                        </span>
+                        <span class="detail-item__value detail-item__value--truncate">
+                          {{ log.user_agent }}
+                        </span>
+                      </div>
+                    }
+                  </div>
+  
+                  <!-- Tags -->
+                  @if (log.tags.length > 0) {
+                    <div class="detail-tags">
+                      <span class="detail-tags__label">
+                        <svg lucideTag class="icon-12"></svg> Etiquetas
+                      </span>
+                      <div class="detail-tags__list">
+                        @for (tag of log.tags; track tag) {
+                          <span class="tag-chip">{{ tag }}</span>
+                        }
+                      </div>
+                    </div>
+                  }
+  
+                  <!-- Cambios -->
+                  @if (getChangesKeys(log.changes).length > 0) {
+                    <div class="changes-section">
+                      <h4 class="changes-section__title">
+                        <svg lucideArrowRightLeft class="icon-14"></svg>
+                        Cambios realizados
+                      </h4>
+                      <div class="changes-table-wrap">
+                        <table class="changes-table">
+                          <thead>
+                            <tr>
+                              <th>Campo</th>
+                              <th>Valor anterior</th>
+                              <th>Valor nuevo</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            @for (field of getChangesKeys(log.changes); track field) {
+                              <tr>
+                                <td class="changes-table__field">{{ getFieldLabel(field) }}</td>
+                                <td class="changes-table__old">
+                                  {{ formatValue(log.changes[field].old) }}
+                                </td>
+                                <td class="changes-table__new">
+                                  {{ formatValue(log.changes[field].new) }}
+                                </td>
+                              </tr>
+                            }
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+  
+          <!-- Vacío -->
+          @if (logs().length === 0 && !isLoading()) {
+            <div class="card">
+              <div class="empty-list">
+                <svg lucideActivity class="icon-32 empty-list__icon"></svg>
+                <p class="empty-list__text">No se encontraron registros de actividad</p>
+                @if (searchTerm() || activeFiltersCount() > 0) {
+                  <button class="btn btn--ghost btn--sm" (click)="clearFilters()">
+                    Limpiar filtros
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+  
+        <!-- Paginación -->
+        @if (totalPages() > 1) {
+          <div class="pagination">
+            <button
+              class="pagination__btn"
+              [disabled]="!hasPrevPage()"
+              (click)="prevPage()"
+            >
+              <svg lucideChevronLeft class="icon-16"></svg>
+            </button>
+  
+            @for (page of getVisiblePages(); track page) {
+              <button
+                class="pagination__btn"
+                [class.pagination__btn--active]="page === currentPage()"
+                (click)="goToPage(page)"
+              >
+                {{ page }}
+              </button>
+            }
+  
+            <button
+              class="pagination__btn"
+              [disabled]="!hasNextPage()"
+              (click)="nextPage()"
+            >
+              <svg lucideChevronRight class="icon-16"></svg>
+            </button>
+  
+            <span class="pagination__info">
+              Página {{ currentPage() }} de {{ totalPages() }}
+            </span>
+          </div>
+        }
+      }
+  
+      <!-- Error -->
+      @if (error()) {
+        <div class="toast toast--error" role="alert">
+          <svg lucideCircleX class="icon-17"></svg>
+          <span>{{ error() }}</span>
+        </div>
+      }
+    }
+  </div>

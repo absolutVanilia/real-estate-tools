@@ -6,6 +6,7 @@ import { PropiedadesActivasComponent } from './pages/propiedades-activas/propied
 import { ChatbotComponent } from './pages/chatbot/chatbot';
 import { UsuariosComponent } from './pages/usuarios/usuarios.component';
 import { CompaniesComponent } from './pages/companies/companies.component';
+import { LogsComponent } from './pages/admin-logs/logs.component';
 import { LoginComponent } from './pages/login/login.component';
 import { authGuard, loginPageGuard } from './guards/auth.guard';
 
@@ -24,6 +25,7 @@ export const routes: Routes = [
       { path: 'usuarios', redirectTo: 'administracion/usuarios', pathMatch: 'full' },
       { path: 'administracion/usuarios', component: UsuariosComponent },
       { path: 'administracion/companies', component: CompaniesComponent },
+      { path: 'administracion/logs', component: LogsComponent },
       { path: '**', redirectTo: 'contratos' }
     ]
   }

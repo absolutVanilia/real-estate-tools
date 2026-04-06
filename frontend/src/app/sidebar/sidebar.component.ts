@@ -17,7 +17,8 @@ import {
   LucideLogOut,
   LucideChevronLeft,
   LucideChevronRight,
-  LucideMenu
+  LucideMenu,
+  LucideActivity
 } from '@lucide/angular';
 
 // Tipo para los items de navegación
@@ -42,7 +43,8 @@ interface NavItem {
     LucideChevronRight,
     LucideMenu,
     // Componente dinámico (para iconos del array)
-    LucideDynamicIcon
+    LucideDynamicIcon,
+    LucideActivity
   ],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.scss'
@@ -59,7 +61,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   adminItems: NavItem[] = [
     { label: 'Usuarios',  route: '/administracion/usuarios',   icon: LucideUsers },
-    { label: 'Compañías', route: '/administracion/companies',  icon: LucideBuilding2, platformOnly: true }
+    { label: 'Compañías', route: '/administracion/companies',  icon: LucideBuilding2, platformOnly: true },
+    { label: 'Logs',      route: '/administracion/logs',       icon: LucideActivity, },
   ];
 
   showAdministration = false;
