@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'contract',
+    "audit",
     'companies',
     'users',
 ]
@@ -56,6 +57,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'audit.middleware.AuditMiddleware', 
 ]
 
 ROOT_URLCONF = 'te_arrendamos.urls'

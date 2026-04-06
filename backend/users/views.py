@@ -7,11 +7,35 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from .models import User
 from .permissions import UserMultiTenantPermission
 from .serializers import CustomTokenObtainPairSerializer, UserSerializer
+from audit.mixins import AuditLogMixin  
+from audit.services import log_action   
 
 
 class LoginView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
     permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+
+        if response.status_code == 200:
+            user_data = response.data.get("user", {})
+            try:
+                user = User.objects.get(id=user_data["id"])
+                log_action(
+                    user=user,
+                    action="LOGIN",
+                    resource_type="auth",
+                    resource_id=user.pk,
+                    resource_display=user.username,
+                    description=f"{user.get_full_name() or user.username} inició sesión",
+                    tags=["auth", "login"],
+                    request=request,
+                )
+            except User.DoesNotExist:
+                pass
+
+        return response
 
 
 class RefreshView(TokenRefreshView):
@@ -25,7 +49,9 @@ class MeView(APIView):
         return Response(UserSerializer(request.user).data)
 
 
-class UserViewSet(viewsets.ModelViewSet):
+class UserViewSet(AuditLogMixin, viewsets.ModelViewSet):
+    audit_resource_type = "user"
+
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated, UserMultiTenantPermission]
 
