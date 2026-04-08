@@ -1,0 +1,406 @@
+<div class="propietarios">
+    <!-- Header -->
+    <header class="page-header">
+      <div class="page-header__info">
+        <h1 class="page-header__title">Propietarios</h1>
+        <p class="page-header__desc">Registra y gestiona los propietarios de inmuebles</p>
+      </div>
+      <div class="page-header__actions">
+        <button
+          class="btn btn--ghost btn--icon-only"
+          (click)="loadOwners()"
+          title="Recargar"
+          [disabled]="isLoading()"
+        >
+          <svg lucideRefreshCw class="icon-16" [class.spin]="isLoading()"></svg>
+        </button>
+        <button class="btn btn--primary" (click)="toggleForm()">
+          @if (showForm()) {
+            <svg lucideX class="icon-16"></svg>
+          } @else {
+            <svg lucidePlus class="icon-16"></svg>
+          }
+          <span>{{ showForm() ? 'Cancelar' : 'Nuevo propietario' }}</span>
+        </button>
+      </div>
+    </header>
+  
+    <!-- Stats rápidas -->
+    <div class="stats-row">
+      <div class="stat-card stat-card--total">
+        <span class="stat-card__value">{{ totalCount() }}</span>
+        <span class="stat-card__label">Total</span>
+      </div>
+      <button
+        class="stat-card stat-card--activo"
+        [class.stat-card--active]="filterActive() === 'true'"
+        (click)="filterActive.set(filterActive() === 'true' ? '' : 'true'); onFilterChange()"
+      >
+        <span class="stat-card__value">{{ statsActivos() }}</span>
+        <span class="stat-card__label">Activos</span>
+      </button>
+      <button
+        class="stat-card stat-card--inactivo"
+        [class.stat-card--active]="filterActive() === 'false'"
+        (click)="filterActive.set(filterActive() === 'false' ? '' : 'false'); onFilterChange()"
+      >
+        <span class="stat-card__value">{{ statsInactivos() }}</span>
+        <span class="stat-card__label">Inactivos</span>
+      </button>
+    </div>
+  
+    <!-- Formulario -->
+    @if (showForm()) {
+      <form class="card card--form" [formGroup]="ownerForm" (ngSubmit)="onSubmit()">
+        <div class="card__header">
+          <h2 class="card__title">
+            <svg lucideUsers class="icon-18 icon-accent"></svg>
+            {{ isEditing() ? 'Editar propietario' : 'Registrar nuevo propietario' }}
+          </h2>
+        </div>
+  
+        <div class="card__body">
+          <!-- Sección: Datos personales -->
+          <div class="form-section">
+            <h3 class="form-section__title">
+              <svg lucideUser class="icon-14"></svg>
+              Datos personales
+            </h3>
+            <div class="form-grid form-grid--2">
+              <div class="form-group">
+                <label class="form-label" for="name">Nombre completo</label>
+                <input
+                  class="form-input"
+                  type="text"
+                  id="name"
+                  formControlName="name"
+                  placeholder="Ej: María García López"
+                  autocomplete="off"
+                />
+                @if (ownerForm.get('name')?.touched && ownerForm.get('name')?.hasError('required')) {
+                  <span class="form-error">El nombre es obligatorio</span>
+                }
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="cedula">Cédula</label>
+                <input
+                  class="form-input"
+                  type="text"
+                  id="cedula"
+                  formControlName="cedula"
+                  placeholder="Ej: 1234567890"
+                  autocomplete="off"
+                />
+                @if (ownerForm.get('cedula')?.touched && ownerForm.get('cedula')?.hasError('required')) {
+                  <span class="form-error">La cédula es obligatoria</span>
+                }
+              </div>
+            </div>
+          </div>
+  
+          <!-- Sección: Contacto -->
+          <div class="form-section">
+            <h3 class="form-section__title">
+              <svg lucidePhone class="icon-14"></svg>
+              Información de contacto
+            </h3>
+            <div class="form-grid form-grid--2">
+              <div class="form-group">
+                <label class="form-label" for="phone">Teléfono</label>
+                <input
+                  class="form-input"
+                  type="tel"
+                  id="phone"
+                  formControlName="phone"
+                  placeholder="Ej: +57 300 123 4567"
+                  autocomplete="off"
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="email">Correo electrónico</label>
+                <input
+                  class="form-input"
+                  type="email"
+                  id="email"
+                  formControlName="email"
+                  placeholder="Ej: maria@ejemplo.com"
+                  autocomplete="off"
+                />
+                @if (ownerForm.get('email')?.touched && ownerForm.get('email')?.hasError('email')) {
+                  <span class="form-error">Ingrese un correo válido</span>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+  
+        <div class="card__actions">
+          <button type="button" class="btn btn--ghost" (click)="cancelForm()">Cancelar</button>
+          <button type="submit" class="btn btn--primary" [disabled]="ownerForm.invalid">
+            <svg lucideCheck class="icon-15"></svg>
+            {{ isEditing() ? 'Actualizar propietario' : 'Registrar propietario' }}
+          </button>
+        </div>
+      </form>
+    }
+  
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="toolbar__search">
+        <svg lucideSearch class="toolbar__search-icon"></svg>
+        <input
+          class="toolbar__search-input"
+          type="text"
+          placeholder="Buscar por nombre, cédula, teléfono, correo..."
+          [ngModel]="searchTerm()"
+          (ngModelChange)="onSearchChange($event)"
+        />
+        @if (searchTerm()) {
+          <button class="toolbar__search-clear" (click)="onSearchChange('')">
+            <svg lucideX class="icon-14"></svg>
+          </button>
+        }
+      </div>
+  
+      <button
+        class="btn btn--ghost"
+        (click)="toggleFilters()"
+        [class.btn--active]="showFilters() || activeFiltersCount() > 0"
+      >
+        <svg lucideFilter class="icon-15"></svg>
+        Filtros
+        @if (activeFiltersCount() > 0) {
+          <span class="filter-count">{{ activeFiltersCount() }}</span>
+        }
+      </button>
+    </div>
+  
+    <!-- Filters -->
+    @if (showFilters()) {
+      <div class="filters-panel">
+        <div class="filters-panel__grid">
+          <div class="form-group">
+            <label class="form-label">Estado</label>
+            <select
+              class="form-select"
+              [ngModel]="filterActive()"
+              (ngModelChange)="filterActive.set($event); onFilterChange()"
+            >
+              <option value="">Todos</option>
+              <option value="true">Activos</option>
+              <option value="false">Inactivos</option>
+            </select>
+          </div>
+        </div>
+        @if (activeFiltersCount() > 0) {
+          <button class="btn btn--link" (click)="clearFilters()">
+            <svg lucideX class="icon-14"></svg>
+            Limpiar filtros
+          </button>
+        }
+      </div>
+    }
+  
+    <!-- Loading -->
+    @if (isLoading()) {
+      <div class="card">
+        <div class="loading-state">
+          <svg lucideRefreshCw class="icon-20 spin"></svg>
+          <p>Cargando propietarios...</p>
+        </div>
+      </div>
+    }
+  
+    <!-- Lista -->
+    @if (!isLoading()) {
+      <div class="owners-list">
+        @for (owner of owners(); track owner.id) {
+          <div
+            class="owner-card"
+            [class.owner-card--expanded]="isExpanded(owner.id)"
+            [class.owner-card--inactive]="!owner.is_active"
+          >
+            <!-- Main row -->
+            <div class="owner-card__main" (click)="toggleExpand(owner.id)">
+              <!-- Avatar -->
+              <div
+                class="owner-card__avatar"
+                [class.owner-card__avatar--inactive]="!owner.is_active"
+              >
+                <span class="owner-card__initials">{{ getInitials(owner.name) }}</span>
+              </div>
+  
+              <!-- Content -->
+              <div class="owner-card__content">
+                <div class="owner-card__top-row">
+                  <p class="owner-card__name">{{ owner.name }}</p>
+                  <span
+                    class="status-badge"
+                    [class]="'status-badge--' + (owner.is_active ? 'activo' : 'inactivo')"
+                  >
+                    {{ owner.is_active ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </div>
+                <div class="owner-card__details-row">
+                  <span class="owner-card__detail">
+                    <svg lucideIdCard class="icon-12"></svg>
+                    {{ owner.cedula }}
+                  </span>
+                  @if (owner.phone) {
+                    <span class="owner-card__detail">
+                      <svg lucidePhone class="icon-12"></svg>
+                      {{ owner.phone }}
+                    </span>
+                  }
+                  @if (owner.email) {
+                    <span class="owner-card__detail owner-card__detail--hide-mobile">
+                      <svg lucideMail class="icon-12"></svg>
+                      {{ owner.email }}
+                    </span>
+                  }
+                </div>
+              </div>
+  
+              <!-- Expand -->
+              <button class="owner-card__expand-btn" aria-label="Ver detalles">
+                @if (isExpanded(owner.id)) {
+                  <svg lucideChevronUp class="icon-16"></svg>
+                } @else {
+                  <svg lucideChevronDown class="icon-16"></svg>
+                }
+              </button>
+            </div>
+  
+            <!-- Expanded -->
+            @if (isExpanded(owner.id)) {
+              <div class="owner-card__expanded">
+                <!-- Info grid -->
+                <div class="info-grid">
+                  <div class="info-item">
+                    <span class="info-item__label">
+                      <svg lucideIdCard class="icon-12"></svg> Cédula
+                    </span>
+                    <span class="info-item__value info-item__value--mono">{{ owner.cedula }}</span>
+                  </div>
+                  @if (owner.phone) {
+                    <div class="info-item">
+                      <span class="info-item__label">
+                        <svg lucidePhone class="icon-12"></svg> Teléfono
+                      </span>
+                      <a class="info-item__value info-item__value--link" href="tel:{{ owner.phone }}">
+                        {{ owner.phone }}
+                      </a>
+                    </div>
+                  }
+                  @if (owner.email) {
+                    <div class="info-item">
+                      <span class="info-item__label">
+                        <svg lucideMail class="icon-12"></svg> Correo
+                      </span>
+                      <a class="info-item__value info-item__value--link" href="mailto:{{ owner.email }}">
+                        {{ owner.email }}
+                      </a>
+                    </div>
+                  }
+                  <div class="info-item">
+                    <span class="info-item__label">
+                      <svg lucideUser class="icon-12"></svg> Registrado por
+                    </span>
+                    <span class="info-item__value">{{ owner.created_by_display }}</span>
+                  </div>
+                </div>
+  
+                <!-- Toggle estado -->
+                <div class="owner-card__toggle-status">
+                  <span class="owner-card__toggle-label">Estado del propietario:</span>
+                  <button
+                    class="toggle-btn"
+                    [class.toggle-btn--active]="owner.is_active"
+                    [class.toggle-btn--inactive]="!owner.is_active"
+                    (click)="toggleActive(owner); $event.stopPropagation()"
+                  >
+                    @if (owner.is_active) {
+                      <svg lucideToggleRight class="icon-16"></svg>
+                      Activo — clic para desactivar
+                    } @else {
+                      <svg lucideToggleLeft class="icon-16"></svg>
+                      Inactivo — clic para activar
+                    }
+                  </button>
+                </div>
+  
+                <!-- Actions -->
+                <div class="owner-card__actions">
+                  <button class="btn btn--ghost btn--sm" (click)="editOwner(owner); $event.stopPropagation()">
+                    <svg lucidePencil class="icon-13"></svg>
+                    Editar
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+  
+        <!-- Empty -->
+        @if (owners().length === 0) {
+          <div class="card">
+            <div class="empty-list">
+              <svg lucideUsers class="icon-40 empty-list__icon"></svg>
+              <h3 class="empty-list__title">No hay propietarios</h3>
+              <p class="empty-list__text">
+                @if (searchTerm() || activeFiltersCount() > 0) {
+                  No se encontraron propietarios con los filtros aplicados.
+                } @else {
+                  Aún no se han registrado propietarios. ¡Registra el primero!
+                }
+              </p>
+              @if (searchTerm() || activeFiltersCount() > 0) {
+                <button class="btn btn--ghost btn--sm" (click)="clearFilters()">Limpiar filtros</button>
+              } @else {
+                <button class="btn btn--primary btn--sm" (click)="openCreateForm()">
+                  <svg lucidePlus class="icon-14"></svg>
+                  Nuevo propietario
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+  
+      <!-- Pagination -->
+      @if (totalPages() > 1) {
+        <div class="pagination">
+          <button class="pagination__btn" [disabled]="!hasPrevPage()" (click)="prevPage()">
+            <svg lucideChevronLeft class="icon-16"></svg>
+          </button>
+          @for (page of getVisiblePages(); track page) {
+            <button
+              class="pagination__btn"
+              [class.pagination__btn--active]="page === currentPage()"
+              (click)="goToPage(page)"
+            >
+              {{ page }}
+            </button>
+          }
+          <button class="pagination__btn" [disabled]="!hasNextPage()" (click)="nextPage()">
+            <svg lucideChevronRight class="icon-16"></svg>
+          </button>
+          <span class="pagination__info">Página {{ currentPage() }} de {{ totalPages() }}</span>
+        </div>
+      }
+    }
+  
+    <!-- Toasts -->
+    @if (message()) {
+      <div class="toast toast--success" role="status">
+        <svg lucideCircleCheck class="icon-17"></svg>
+        <span>{{ message() }}</span>
+      </div>
+    }
+    @if (error()) {
+      <div class="toast toast--error" role="alert">
+        <svg lucideCircleX class="icon-17"></svg>
+        <span>{{ error() }}</span>
+      </div>
+    }
+  </div>

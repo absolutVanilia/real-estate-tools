@@ -5,7 +5,6 @@ import { filter, Subscription } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 import { SidebarService } from '../services/sidebar.service';
 
-// Importar el componente dinámico y cada icono que necesites
 import {
   LucideDynamicIcon,
   LucideHome,
@@ -18,14 +17,14 @@ import {
   LucideChevronLeft,
   LucideChevronRight,
   LucideMenu,
-  LucideActivity
+  LucideActivity,
+  LucideUserCheck,       
 } from '@lucide/angular';
 
-// Tipo para los items de navegación
 interface NavItem {
   label: string;
   route: string;
-  icon: any; // referencia al componente del icono
+  icon: any;
   platformOnly?: boolean;
 }
 
@@ -36,33 +35,32 @@ interface NavItem {
     CommonModule,
     RouterLink,
     RouterLinkActive,
-    // Iconos estáticos (usados directamente en el template)
     LucideHome,
     LucideLogOut,
     LucideChevronLeft,
     LucideChevronRight,
     LucideMenu,
-    // Componente dinámico (para iconos del array)
     LucideDynamicIcon,
-    LucideActivity
+    LucideActivity,
+    LucideUserCheck,      
   ],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.scss'
 })
 export class SidebarComponent implements OnInit, OnDestroy {
 
-  // Los iconos ahora son referencias a componentes
   navItems: NavItem[] = [
     { label: 'Contratos',           route: '/contratos',           icon: LucideFileText },
     { label: 'Citas',               route: '/citas',               icon: LucideCalendarDays },
     { label: 'Propiedades activas', route: '/propiedades-activas', icon: LucideHome },
-    { label: 'Chatbot',             route: '/chatbot',             icon: LucideMessageSquare }
+    { label: 'Propietarios',        route: '/propietarios',        icon: LucideUserCheck },  
+    { label: 'Chatbot',             route: '/chatbot',             icon: LucideMessageSquare },
   ];
 
   adminItems: NavItem[] = [
     { label: 'Usuarios',  route: '/administracion/usuarios',   icon: LucideUsers },
     { label: 'Compañías', route: '/administracion/companies',  icon: LucideBuilding2, platformOnly: true },
-    { label: 'Logs',      route: '/administracion/logs',       icon: LucideActivity, },
+    { label: 'Logs',      route: '/administracion/logs',       icon: LucideActivity },
   ];
 
   showAdministration = false;
