@@ -82,6 +82,9 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
+          "options": {
+            "allowedHosts": ["proelimination-kamron-mistakably.ngrok-free.dev", "192.168.208.26"]
+          },
           "configurations": {
             "production": {
               "buildTarget": "te-arrendamos:build:production"

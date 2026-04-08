@@ -65,11 +65,21 @@ class AuditLogViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets
 
     def list(self, request, *args, **kwargs):
         response = super().list(request, *args, **kwargs)
-        # Agregar opciones de filtro para el frontend
+
+        # Obtener opciones de filtro SIN duplicados
+        # Usamos el queryset BASE (sin paginación) para los distinct
+        base_qs = self.get_queryset()
+
         response.data["filter_options"] = {
-            "actions": [c[0] for c in AuditLog.ACTION_CHOICES],
+            "actions": list(
+                base_qs.values_list("action", flat=True)
+                .distinct()
+                .order_by("action")
+            ),
             "resource_types": list(
-                AuditLog.objects.values_list("resource_type", flat=True).distinct()[:50]
+                base_qs.values_list("resource_type", flat=True)
+                .distinct()
+                .order_by("resource_type")
             ),
         }
         return response

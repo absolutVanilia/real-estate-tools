@@ -1,0 +1,539 @@
+<div class="citas">
+    <!-- Header -->
+    <header class="page-header">
+      <div class="page-header__info">
+        <h1 class="page-header__title">Citas</h1>
+        <p class="page-header__desc">Agenda y gestiona las visitas a propiedades</p>
+      </div>
+      <div class="page-header__actions">
+        <button
+          class="btn btn--ghost btn--icon-only"
+          (click)="loadAppointments()"
+          title="Recargar"
+          [disabled]="isLoading()"
+        >
+          <svg lucideRefreshCw class="icon-16" [class.spin]="isLoading()"></svg>
+        </button>
+        <button class="btn btn--primary" (click)="toggleForm()">
+          @if (showForm()) {
+            <svg lucideX class="icon-16"></svg>
+          } @else {
+            <svg lucidePlus class="icon-16"></svg>
+          }
+          <span>{{ showForm() ? 'Cancelar' : 'Agendar cita' }}</span>
+        </button>
+      </div>
+    </header>
+  
+    <!-- Stats rápidas -->
+    <div class="stats-row">
+      <div class="stat-card stat-card--total">
+        <span class="stat-card__value">{{ totalCount() }}</span>
+        <span class="stat-card__label">Total</span>
+      </div>
+      <button
+        class="stat-card stat-card--pendiente"
+        [class.stat-card--active]="filterStatus() === 'pendiente'"
+        (click)="filterStatus.set(filterStatus() === 'pendiente' ? '' : 'pendiente'); onFilterChange()"
+      >
+        <span class="stat-card__value">{{ statsPendientes() }}</span>
+        <span class="stat-card__label">Pendientes</span>
+      </button>
+      <button
+        class="stat-card stat-card--confirmada"
+        [class.stat-card--active]="filterStatus() === 'confirmada'"
+        (click)="filterStatus.set(filterStatus() === 'confirmada' ? '' : 'confirmada'); onFilterChange()"
+      >
+        <span class="stat-card__value">{{ statsConfirmadas() }}</span>
+        <span class="stat-card__label">Confirmadas</span>
+      </button>
+      <button
+        class="stat-card stat-card--cancelada"
+        [class.stat-card--active]="filterStatus() === 'cancelada'"
+        (click)="filterStatus.set(filterStatus() === 'cancelada' ? '' : 'cancelada'); onFilterChange()"
+      >
+        <span class="stat-card__value">{{ statsCanceladas() }}</span>
+        <span class="stat-card__label">Canceladas</span>
+      </button>
+    </div>
+  
+    <!-- Formulario -->
+    @if (showForm()) {
+      <form class="card card--form" [formGroup]="appointmentForm" (ngSubmit)="onSubmit()">
+        <div class="card__header">
+          <h2 class="card__title">
+            <svg lucideCalendarDays class="icon-18 icon-accent"></svg>
+            {{ isEditing() ? 'Editar cita' : 'Agendar nueva cita' }}
+          </h2>
+        </div>
+  
+        <div class="card__body">
+          <!-- Sección: Fecha y hora -->
+          <div class="form-section">
+            <h3 class="form-section__title">
+              <svg lucideClock class="icon-14"></svg>
+              Fecha y hora
+            </h3>
+            <div class="form-grid form-grid--2">
+              <div class="form-group">
+                <label class="form-label" for="date">Fecha</label>
+                <input class="form-input" type="date" id="date" formControlName="date" />
+                @if (appointmentForm.get('date')?.touched && appointmentForm.get('date')?.hasError('required')) {
+                  <span class="form-error">La fecha es obligatoria</span>
+                }
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="time">Hora</label>
+                <input class="form-input" type="time" id="time" formControlName="time" />
+                @if (appointmentForm.get('time')?.touched && appointmentForm.get('time')?.hasError('required')) {
+                  <span class="form-error">La hora es obligatoria</span>
+                }
+              </div>
+            </div>
+          </div>
+  
+          <!-- Sección: Interesado -->
+          <div class="form-section">
+            <h3 class="form-section__title">
+              <svg lucideUser class="icon-14"></svg>
+              Datos del interesado
+            </h3>
+            <div class="form-grid form-grid--2">
+              <div class="form-group">
+                <label class="form-label" for="interested_name">Nombre completo</label>
+                <input
+                  class="form-input"
+                  type="text"
+                  id="interested_name"
+                  formControlName="interested_name"
+                  placeholder="Ej: Juan Pérez"
+                  autocomplete="off"
+                />
+                @if (appointmentForm.get('interested_name')?.touched && appointmentForm.get('interested_name')?.hasError('required')) {
+                  <span class="form-error">El nombre es obligatorio</span>
+                }
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="interested_phone">Teléfono</label>
+                <input
+                  class="form-input"
+                  type="tel"
+                  id="interested_phone"
+                  formControlName="interested_phone"
+                  placeholder="Ej: +57 300 123 4567"
+                  autocomplete="off"
+                />
+              </div>
+            </div>
+          </div>
+  
+          <!-- Sección: Propiedad -->
+          <div class="form-section">
+            <h3 class="form-section__title">
+              <svg lucideHome class="icon-14"></svg>
+              Información de la propiedad
+            </h3>
+            <div class="form-grid form-grid--1">
+              <div class="form-group">
+                <label class="form-label" for="property_address">Dirección</label>
+                <input
+                  class="form-input"
+                  type="text"
+                  id="property_address"
+                  formControlName="property_address"
+                  placeholder="Ej: Calle 100 #15-20, Apto 301"
+                  autocomplete="off"
+                />
+                @if (appointmentForm.get('property_address')?.touched && appointmentForm.get('property_address')?.hasError('required')) {
+                  <span class="form-error">La dirección es obligatoria</span>
+                }
+              </div>
+            </div>
+            <div class="form-grid form-grid--3">
+              <div class="form-group">
+                <label class="form-label" for="sector">Sector</label>
+                <input
+                  class="form-input"
+                  type="text"
+                  id="sector"
+                  formControlName="sector"
+                  placeholder="Ej: Norte"
+                  autocomplete="off"
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="property_code">Código propiedad</label>
+                <input
+                  class="form-input"
+                  type="text"
+                  id="property_code"
+                  formControlName="property_code"
+                  placeholder="Ej: PROP-001"
+                  autocomplete="off"
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="key_number">Número de llave</label>
+                <input
+                  class="form-input"
+                  type="text"
+                  id="key_number"
+                  formControlName="key_number"
+                  placeholder="Ej: L-045"
+                  autocomplete="off"
+                />
+              </div>
+            </div>
+          </div>
+  
+          <!-- Sección: Estado y notas -->
+          <div class="form-section">
+            <h3 class="form-section__title">
+              <svg lucideInfo class="icon-14"></svg>
+              Estado y observaciones
+            </h3>
+            <div class="form-grid form-grid--2">
+              <div class="form-group">
+                <label class="form-label" for="status">Estado</label>
+                <select class="form-select" id="status" formControlName="status">
+                  <option value="pendiente">Pendiente</option>
+                  <option value="confirmada">Confirmada</option>
+                  <option value="cancelada">Cancelada</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="notes">Notas</label>
+                <textarea
+                  class="form-textarea"
+                  id="notes"
+                  formControlName="notes"
+                  placeholder="Observaciones adicionales..."
+                  rows="2"
+                ></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+  
+        <div class="card__actions">
+          <button type="button" class="btn btn--ghost" (click)="cancelForm()">Cancelar</button>
+          <button type="submit" class="btn btn--primary" [disabled]="appointmentForm.invalid">
+            <svg lucideCheck class="icon-15"></svg>
+            {{ isEditing() ? 'Actualizar cita' : 'Agendar cita' }}
+          </button>
+        </div>
+      </form>
+    }
+  
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="toolbar__search">
+        <svg lucideSearch class="toolbar__search-icon"></svg>
+        <input
+          class="toolbar__search-input"
+          type="text"
+          placeholder="Buscar por nombre, dirección, código..."
+          [ngModel]="searchTerm()"
+          (ngModelChange)="onSearchChange($event)"
+        />
+        @if (searchTerm()) {
+          <button class="toolbar__search-clear" (click)="onSearchChange('')">
+            <svg lucideX class="icon-14"></svg>
+          </button>
+        }
+      </div>
+  
+      <button
+        class="btn btn--ghost"
+        (click)="toggleFilters()"
+        [class.btn--active]="showFilters() || activeFiltersCount() > 0"
+      >
+        <svg lucideFilter class="icon-15"></svg>
+        Filtros
+        @if (activeFiltersCount() > 0) {
+          <span class="filter-count">{{ activeFiltersCount() }}</span>
+        }
+      </button>
+    </div>
+  
+    <!-- Filters -->
+    @if (showFilters()) {
+      <div class="filters-panel">
+        <div class="filters-panel__grid">
+          <div class="form-group">
+            <label class="form-label">Estado</label>
+            <select
+              class="form-select"
+              [ngModel]="filterStatus()"
+              (ngModelChange)="filterStatus.set($event); onFilterChange()"
+            >
+              <option value="">Todos</option>
+              <option value="pendiente">Pendiente</option>
+              <option value="confirmada">Confirmada</option>
+              <option value="cancelada">Cancelada</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Desde</label>
+            <input
+              class="form-input"
+              type="date"
+              [ngModel]="filterDateFrom()"
+              (ngModelChange)="filterDateFrom.set($event); onFilterChange()"
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Hasta</label>
+            <input
+              class="form-input"
+              type="date"
+              [ngModel]="filterDateTo()"
+              (ngModelChange)="filterDateTo.set($event); onFilterChange()"
+            />
+          </div>
+        </div>
+        @if (activeFiltersCount() > 0) {
+          <button class="btn btn--link" (click)="clearFilters()">
+            <svg lucideX class="icon-14"></svg>
+            Limpiar filtros
+          </button>
+        }
+      </div>
+    }
+  
+    <!-- Loading -->
+    @if (isLoading()) {
+      <div class="card">
+        <div class="loading-state">
+          <svg lucideRefreshCw class="icon-20 spin"></svg>
+          <p>Cargando citas...</p>
+        </div>
+      </div>
+    }
+  
+    <!-- Lista -->
+    @if (!isLoading()) {
+      <div class="appointments-list">
+        @for (apt of appointments(); track apt.id) {
+          <div
+            class="apt-card"
+            [class.apt-card--expanded]="isExpanded(apt.id)"
+            [class.apt-card--today]="isToday(apt.date)"
+            [class.apt-card--past]="isPast(apt.date) && apt.status !== 'cancelada'"
+            [class.apt-card--deleting]="deletingId() === apt.id"
+          >
+            <!-- Main row -->
+            <div class="apt-card__main" (click)="toggleExpand(apt.id)">
+              <!-- Date block -->
+              <div class="apt-card__date-block">
+                <span class="apt-card__day">{{ apt.date | date: 'dd' }}</span>
+                <span class="apt-card__month">{{ apt.date | date: 'MMM' }}</span>
+              </div>
+  
+              <!-- Content -->
+              <div class="apt-card__content">
+                <div class="apt-card__top-row">
+                  <p class="apt-card__name">{{ apt.interested_name }}</p>
+                  <span
+                    class="status-badge"
+                    [class]="'status-badge--' + apt.status"
+                  >
+                    {{ getStatusLabel(apt.status) }}
+                  </span>
+                </div>
+                <div class="apt-card__details-row">
+                  <span class="apt-card__detail">
+                    <svg lucideClock class="icon-12"></svg>
+                    {{ formatTime(apt.time) }}
+                  </span>
+                  <span class="apt-card__detail">
+                    <svg lucideMapPin class="icon-12"></svg>
+                    {{ apt.property_address }}
+                  </span>
+                  @if (apt.sector) {
+                    <span class="apt-card__detail apt-card__detail--hide-mobile">
+                      <svg lucideHome class="icon-12"></svg>
+                      {{ apt.sector }}
+                    </span>
+                  }
+                </div>
+              </div>
+  
+              <!-- Expand -->
+              <button class="apt-card__expand-btn" aria-label="Ver detalles">
+                @if (isExpanded(apt.id)) {
+                  <svg lucideChevronUp class="icon-16"></svg>
+                } @else {
+                  <svg lucideChevronDown class="icon-16"></svg>
+                }
+              </button>
+            </div>
+  
+            <!-- Expanded -->
+            @if (isExpanded(apt.id)) {
+              <div class="apt-card__expanded">
+                <!-- Info grid -->
+                <div class="info-grid">
+                  @if (apt.interested_phone) {
+                    <div class="info-item">
+                      <span class="info-item__label">
+                        <svg lucidePhone class="icon-12"></svg> Teléfono
+                      </span>
+                      <a class="info-item__value info-item__value--link" href="tel:{{ apt.interested_phone }}">
+                        {{ apt.interested_phone }}
+                      </a>
+                    </div>
+                  }
+                  @if (apt.property_code) {
+                    <div class="info-item">
+                      <span class="info-item__label">
+                        <svg lucideHash class="icon-12"></svg> Código
+                      </span>
+                      <span class="info-item__value">{{ apt.property_code }}</span>
+                    </div>
+                  }
+                  @if (apt.key_number) {
+                    <div class="info-item">
+                      <span class="info-item__label">
+                        <svg lucideKey class="icon-12"></svg> Llave
+                      </span>
+                      <span class="info-item__value">{{ apt.key_number }}</span>
+                    </div>
+                  }
+                  <div class="info-item">
+                    <span class="info-item__label">
+                      <svg lucideUser class="icon-12"></svg> Agendada por
+                    </span>
+                    <span class="info-item__value">{{ apt.scheduled_by_display }}</span>
+                  </div>
+                </div>
+  
+                <!-- Notas -->
+                @if (apt.notes) {
+                  <div class="apt-card__notes">
+                    <span class="apt-card__notes-label">
+                      <svg lucideFileText class="icon-12"></svg> Notas
+                    </span>
+                    <p class="apt-card__notes-text">{{ apt.notes }}</p>
+                  </div>
+                }
+  
+                <!-- Quick status -->
+                <div class="apt-card__quick-status">
+                  <span class="apt-card__quick-label">Cambiar estado:</span>
+                  @if (apt.status !== 'confirmada') {
+                    <button
+                      class="status-btn status-btn--confirmada"
+                      (click)="updateStatus(apt, 'confirmada'); $event.stopPropagation()"
+                    >
+                      <svg lucideCircleCheck class="icon-13"></svg>
+                      Confirmar
+                    </button>
+                  }
+                  @if (apt.status !== 'pendiente') {
+                    <button
+                      class="status-btn status-btn--pendiente"
+                      (click)="updateStatus(apt, 'pendiente'); $event.stopPropagation()"
+                    >
+                      <svg lucideClock class="icon-13"></svg>
+                      Pendiente
+                    </button>
+                  }
+                  @if (apt.status !== 'cancelada') {
+                    <button
+                      class="status-btn status-btn--cancelada"
+                      (click)="updateStatus(apt, 'cancelada'); $event.stopPropagation()"
+                    >
+                      <svg lucideCircleX class="icon-13"></svg>
+                      Cancelar
+                    </button>
+                  }
+                </div>
+  
+                <!-- Actions -->
+                <div class="apt-card__actions">
+                  @if (deletingId() === apt.id) {
+                    <div class="confirm-delete">
+                      <span class="confirm-delete__text">¿Eliminar esta cita?</span>
+                      <button class="btn btn--danger btn--sm" (click)="deleteAppointment(apt.id)">Eliminar</button>
+                      <button class="btn btn--ghost btn--sm" (click)="cancelDelete()">Cancelar</button>
+                    </div>
+                  } @else {
+                    <button class="btn btn--ghost btn--sm" (click)="editAppointment(apt); $event.stopPropagation()">
+                      <svg lucidePencil class="icon-13"></svg>
+                      Editar
+                    </button>
+                    <button class="btn btn--danger-ghost btn--sm" (click)="confirmDelete(apt.id); $event.stopPropagation()">
+                      <svg lucideTrash2 class="icon-13"></svg>
+                      Eliminar
+                    </button>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+  
+        <!-- Empty -->
+        @if (appointments().length === 0) {
+          <div class="card">
+            <div class="empty-list">
+              <svg lucideCalendarDays class="icon-40 empty-list__icon"></svg>
+              <h3 class="empty-list__title">No hay citas</h3>
+              <p class="empty-list__text">
+                @if (searchTerm() || activeFiltersCount() > 0) {
+                  No se encontraron citas con los filtros aplicados.
+                } @else {
+                  Aún no se han agendado citas. ¡Crea la primera!
+                }
+              </p>
+              @if (searchTerm() || activeFiltersCount() > 0) {
+                <button class="btn btn--ghost btn--sm" (click)="clearFilters()">Limpiar filtros</button>
+              } @else {
+                <button class="btn btn--primary btn--sm" (click)="openCreateForm()">
+                  <svg lucidePlus class="icon-14"></svg>
+                  Agendar cita
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+  
+      <!-- Pagination -->
+      @if (totalPages() > 1) {
+        <div class="pagination">
+          <button class="pagination__btn" [disabled]="!hasPrevPage()" (click)="prevPage()">
+            <svg lucideChevronLeft class="icon-16"></svg>
+          </button>
+          @for (page of getVisiblePages(); track page) {
+            <button
+              class="pagination__btn"
+              [class.pagination__btn--active]="page === currentPage()"
+              (click)="goToPage(page)"
+            >
+              {{ page }}
+            </button>
+          }
+          <button class="pagination__btn" [disabled]="!hasNextPage()" (click)="nextPage()">
+            <svg lucideChevronRight class="icon-16"></svg>
+          </button>
+          <span class="pagination__info">Página {{ currentPage() }} de {{ totalPages() }}</span>
+        </div>
+      }
+    }
+  
+    <!-- Toasts -->
+    @if (message()) {
+      <div class="toast toast--success" role="status">
+        <svg lucideCircleCheck class="icon-17"></svg>
+        <span>{{ message() }}</span>
+      </div>
+    }
+    @if (error()) {
+      <div class="toast toast--error" role="alert">
+        <svg lucideCircleX class="icon-17"></svg>
+        <span>{{ error() }}</span>
+      </div>
+    }
+  </div>
