@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
-const API_URL = 'http://127.0.0.1:8000/api/appointments/';
+
+const API_URL = `${environment.apiUrl}/api/appointments/`;
 
 export interface Appointment {
   id: number;
