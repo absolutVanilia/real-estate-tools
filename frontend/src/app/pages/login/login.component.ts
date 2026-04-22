@@ -1,7 +1,20 @@
-import { Component } from '@angular/core';
+import {
+  Component,
+  ChangeDetectorRef,
+  AfterViewInit,
+  OnDestroy,
+  NgZone,
+  ElementRef
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators
+} from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Subject, takeUntil } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -11,16 +24,27 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
 })
-export class LoginComponent {
+export class LoginComponent implements AfterViewInit, OnDestroy {
   form: FormGroup;
   error = '';
   submitting = false;
+  currentYear = new Date().getFullYear();
+  showPassword = false;
+
+  // ─── FIX: flag de autofill detectado ───
+  autofilled = false;
+
+  private destroy$ = new Subject<void>();
+  private autofillCheckTimer: ReturnType<typeof setInterval> | null = null;
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef,
+    private ngZone: NgZone,
+    private elRef: ElementRef
   ) {
     this.form = this.fb.group({
       username: ['', Validators.required],
@@ -28,23 +52,113 @@ export class LoginComponent {
     });
   }
 
-  onSubmit(): void {
-    if (this.form.invalid || this.submitting) {
-      return;
+  // ──────────────────────────────────────────────────────
+  //  FIX: Detectar autofill vía pseudo-clase CSS
+  //  No leemos valores (Chrome los oculta), solo detectamos
+  //  que el navegador aplicó :-webkit-autofill a los inputs
+  // ──────────────────────────────────────────────────────
+  ngAfterViewInit(): void {
+    this.ngZone.runOutsideAngular(() => {
+      let checks = 0;
+      this.autofillCheckTimer = setInterval(() => {
+        checks++;
+        const autofilled = this.detectAutofill();
+        if (autofilled && !this.autofilled) {
+          this.ngZone.run(() => {
+            this.autofilled = true;
+            this.cdr.detectChanges();
+          });
+          this.clearAutofillTimer();
+        }
+        // Dejar de buscar después de ~5 segundos
+        if (checks >= 25) {
+          this.clearAutofillTimer();
+        }
+      }, 200);
+    });
+  }
+
+  /**
+   * Usa la pseudo-clase CSS :-webkit-autofill / :autofill
+   * para detectar si el navegador autocompletó los campos.
+   * Esto SÍ funciona aunque input.value esté vacío.
+   */
+  private detectAutofill(): boolean {
+    try {
+      const root = this.elRef.nativeElement as HTMLElement;
+      const autofilledInputs = root.querySelectorAll(
+        'input:-webkit-autofill'
+      );
+      return autofilledInputs.length >= 2; // username + password
+    } catch {
+      return false;
     }
+  }
+
+  /**
+   * Sincroniza los valores nativos del DOM al FormGroup.
+   * Se llama SOLO en onSubmit(), cuando el usuario ya hizo clic
+   * y Chrome libera los valores.
+   */
+  private syncNativeValues(): void {
+    const usernameEl = document.getElementById('username') as HTMLInputElement;
+    const passwordEl = document.getElementById('password') as HTMLInputElement;
+
+    if (!usernameEl || !passwordEl) return;
+
+    this.form.patchValue({
+      username: usernameEl.value,
+      password: passwordEl.value
+    });
+    this.form.updateValueAndValidity();
+  }
+
+  private clearAutofillTimer(): void {
+    if (this.autofillCheckTimer) {
+      clearInterval(this.autofillCheckTimer);
+      this.autofillCheckTimer = null;
+    }
+  }
+
+  onSubmit(): void {
+    // ── FIX: Si hubo autofill, ahora que el usuario hizo clic,
+    //    Chrome ya expone los valores → sincronizamos ──
+    if (this.autofilled) {
+      this.syncNativeValues();
+      this.autofilled = false; // reset flag
+    }
+
+    if (this.form.invalid || this.submitting) return;
 
     this.error = '';
     this.submitting = true;
 
-    this.authService.login(this.form.value).subscribe({
-      next: () => {
-        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/contratos';
-        this.router.navigateByUrl(returnUrl);
-      },
-      error: () => {
-        this.error = 'Usuario o contraseña incorrectos.';
-        this.submitting = false;
-      }
-    });
+    const returnUrl =
+      this.route.snapshot.queryParamMap.get('returnUrl') || '/contratos';
+    const safeUrl = returnUrl.startsWith('/') ? returnUrl : '/contratos';
+
+    this.authService
+      .login(this.form.value)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.router.navigateByUrl(safeUrl);
+        },
+        error: () => {
+          this.error = 'Usuario o contraseña incorrectos.';
+          this.submitting = false;
+          this.cdr.detectChanges();
+        }
+      });
+  }
+
+  togglePassword(): void {
+    this.showPassword = !this.showPassword;
+  }
+
+  ngOnDestroy(): void {
+    this.clearAutofillTimer();
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }
