@@ -1,0 +1,1127 @@
+<div class="propiedades">
+
+    <!-- ═══════════════════════════════════ -->
+    <!--  HEADER                            -->
+    <!-- ═══════════════════════════════════ -->
+    <header class="page-header">
+      <div class="page-header__info">
+        <h1 class="page-header__title">Propiedades</h1>
+        <p class="page-header__desc">Registra y gestiona el inventario de inmuebles</p>
+      </div>
+      <div class="page-header__actions">
+        <button
+          class="btn btn--ghost btn--icon-only"
+          (click)="loadProperties()"
+          title="Recargar"
+          [disabled]="isLoading()"
+        >
+          <svg lucideRefreshCw class="icon-16" [class.spin]="isLoading()"></svg>
+        </button>
+        <button class="btn btn--primary" (click)="toggleForm()">
+          @if (showForm()) {
+            <svg lucideX class="icon-16"></svg>
+          } @else {
+            <svg lucidePlus class="icon-16"></svg>
+          }
+          <span>{{ showForm() ? 'Cancelar' : 'Nueva propiedad' }}</span>
+        </button>
+      </div>
+    </header>
+  
+    <!-- ═══════════════════════════════════ -->
+    <!--  STATS                             -->
+    <!-- ═══════════════════════════════════ -->
+    <div class="stats-row">
+      <div class="stat-card stat-card--total">
+        <span class="stat-card__value">{{ totalCount() }}</span>
+        <span class="stat-card__label">Total</span>
+      </div>
+      <div class="stat-card stat-card--arriendo">
+        <span class="stat-card__value">{{ statsArriendo() }}</span>
+        <span class="stat-card__label">Arriendo</span>
+      </div>
+      <div class="stat-card stat-card--venta">
+        <span class="stat-card__value">{{ statsVenta() }}</span>
+        <span class="stat-card__label">Venta</span>
+      </div>
+      <button
+        class="stat-card stat-card--preinv"
+        [class.stat-card--active]="filterPreInventario() === 'true'"
+        (click)="filterPreInventario.set(filterPreInventario() === 'true' ? '' : 'true'); onFilterChange()"
+      >
+        <span class="stat-card__value">{{ statsPreInv() }}</span>
+        <span class="stat-card__label">Pre-inventario</span>
+      </button>
+    </div>
+  
+    <!-- ═══════════════════════════════════ -->
+    <!--  FORMULARIO WIZARD                 -->
+    <!-- ═══════════════════════════════════ -->
+    @if (showForm()) {
+      <form class="card card--form" [formGroup]="propertyForm" (ngSubmit)="onSubmit()">
+  
+        <!-- Card header -->
+        <div class="card__header">
+          <h2 class="card__title">
+            <svg lucideHome class="icon-18 icon-accent"></svg>
+            {{ isEditing() ? 'Editar propiedad' : 'Registrar nueva propiedad' }}
+          </h2>
+        </div>
+  
+        <!-- Stepper -->
+        <div class="stepper">
+          @for (step of steps; track step.num; let i = $index) {
+            @if (i > 0) {
+              <span
+                class="step__connector"
+                [class.step__connector--done]="isStepCompleted(steps[i - 1].num)"
+              ></span>
+            }
+            <div
+              class="step"
+              [class.step--active]="formStep() === step.num"
+              [class.step--completed]="isStepCompleted(step.num)"
+              [class.step--accessible]="isStepAccessible(step.num)"
+              (click)="goToStep(step.num)"
+            >
+              <span class="step__bubble">
+                @if (isStepCompleted(step.num)) {
+                  <svg lucideCheck class="icon-14"></svg>
+                } @else {
+                  {{ step.num }}
+                }
+              </span>
+              <span class="step__label">{{ step.label }}</span>
+            </div>
+          }
+        </div>
+  
+        <!-- Card body -->
+        <div class="card__body">
+  
+          <!-- ════════════════════════ -->
+          <!--  STEP 1: Identificación -->
+          <!-- ════════════════════════ -->
+          @if (formStep() === 1) {
+            <div class="step-content">
+              <!-- Identificación -->
+              <div class="form-section">
+                <h3 class="form-section__title">
+                  <svg lucideHash class="icon-14"></svg>
+                  Identificación
+                </h3>
+                <div class="form-grid form-grid--2">
+                  <div class="form-group">
+                    <label class="form-label" for="codigo">Código de propiedad *</label>
+                    <input
+                      class="form-input"
+                      type="text"
+                      id="codigo"
+                      formControlName="codigo"
+                      placeholder="Ej: PROP-001"
+                      autocomplete="off"
+                    />
+                    @if (propertyForm.get('codigo')?.touched && propertyForm.get('codigo')?.hasError('required')) {
+                      <span class="form-error">El código es obligatorio</span>
+                    }
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Pre-inventario</label>
+                    <div class="pre-inventario-toggle">
+                      <label class="switch">
+                        <input type="checkbox" formControlName="pre_inventario" />
+                        <span class="switch__slider"></span>
+                      </label>
+                      <div>
+                        <span class="pre-inventario-toggle__label">
+                          {{ propertyForm.get('pre_inventario')?.value ? 'Sí' : 'No' }}
+                        </span>
+                        <span class="pre-inventario-toggle__hint">Marcar si es pre-inventario</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+  
+              <!-- Ubicación -->
+              <div class="form-section">
+                <h3 class="form-section__title">
+                  <svg lucideMapPin class="icon-14"></svg>
+                  Ubicación
+                </h3>
+                <div class="form-grid form-grid--1">
+                  <div class="form-group">
+                    <label class="form-label" for="direccion">Dirección *</label>
+                    <input
+                      class="form-input"
+                      type="text"
+                      id="direccion"
+                      formControlName="direccion"
+                      placeholder="Ej: Calle 100 #15-20, Apto 301"
+                      autocomplete="off"
+                    />
+                    @if (propertyForm.get('direccion')?.touched && propertyForm.get('direccion')?.hasError('required')) {
+                      <span class="form-error">La dirección es obligatoria</span>
+                    }
+                  </div>
+                </div>
+                <div class="form-grid form-grid--2">
+                  <div class="form-group">
+                    <label class="form-label" for="sector">Sector</label>
+                    <input
+                      class="form-input"
+                      type="text"
+                      id="sector"
+                      formControlName="sector"
+                      placeholder="Ej: Norte, Cabecera"
+                      autocomplete="off"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="punto_referencia">Punto de referencia</label>
+                    <input
+                      class="form-input"
+                      type="text"
+                      id="punto_referencia"
+                      formControlName="punto_referencia"
+                      placeholder="Ej: Frente al parque central"
+                      autocomplete="off"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+  
+          <!-- ════════════════════════ -->
+          <!--  STEP 2: Comercial      -->
+          <!-- ════════════════════════ -->
+          @if (formStep() === 2) {
+            <div class="step-content">
+              <div class="form-section">
+                <h3 class="form-section__title">
+                  <svg lucideDollarSign class="icon-14"></svg>
+                  Precios
+                </h3>
+                <div class="form-grid form-grid--2">
+                  <div class="form-group">
+                    <label class="form-label" for="precio_arriendo">Precio arriendo</label>
+                    <input
+                      class="form-input"
+                      type="number"
+                      id="precio_arriendo"
+                      formControlName="precio_arriendo"
+                      placeholder="Ej: 1500000"
+                      min="0"
+                    />
+                    <span class="form-hint">Dejar vacío si no aplica</span>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="precio_venta">Precio venta</label>
+                    <input
+                      class="form-input"
+                      type="number"
+                      id="precio_venta"
+                      formControlName="precio_venta"
+                      placeholder="Ej: 350000000"
+                      min="0"
+                    />
+                    <span class="form-hint">Dejar vacío si no aplica</span>
+                  </div>
+                </div>
+              </div>
+  
+              <div class="form-section">
+                <h3 class="form-section__title">
+                  <svg lucideRuler class="icon-14"></svg>
+                  Características generales
+                </h3>
+                <div class="form-grid form-grid--3">
+                  <div class="form-group">
+                    <label class="form-label" for="area">Área (m²)</label>
+                    <input
+                      class="form-input"
+                      type="number"
+                      id="area"
+                      formControlName="area"
+                      placeholder="Ej: 85.5"
+                      min="0"
+                      step="0.1"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="piso_numero">Piso / Nivel</label>
+                    <input
+                      class="form-input"
+                      type="number"
+                      id="piso_numero"
+                      formControlName="piso_numero"
+                      placeholder="Ej: 3"
+                      min="0"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="estrato">Estrato</label>
+                    <select class="form-select" id="estrato" formControlName="estrato">
+                      <option [ngValue]="null">Sin especificar</option>
+                      <option [ngValue]="1">1</option>
+                      <option [ngValue]="2">2</option>
+                      <option [ngValue]="3">3</option>
+                      <option [ngValue]="4">4</option>
+                      <option [ngValue]="5">5</option>
+                      <option [ngValue]="6">6</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+  
+          <!-- ════════════════════════ -->
+          <!--  STEP 3: Distribución   -->
+          <!-- ════════════════════════ -->
+          @if (formStep() === 3) {
+            <div class="step-content">
+              <div class="form-section">
+                <h3 class="form-section__title">
+                  <svg lucideBedDouble class="icon-14"></svg>
+                  Habitaciones
+                </h3>
+                <div class="form-grid form-grid--3">
+                  <div class="form-group">
+                    <label class="form-label" for="alcobas">Alcobas</label>
+                    <input
+                      class="form-input"
+                      type="number"
+                      id="alcobas"
+                      formControlName="alcobas"
+                      min="0"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="banos">Baños</label>
+                    <input
+                      class="form-input"
+                      type="number"
+                      id="banos"
+                      formControlName="banos"
+                      min="0"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="tipo_zona_social">Zona social</label>
+                    <select class="form-select" id="tipo_zona_social" formControlName="tipo_zona_social">
+                      @for (opt of TIPO_ZONA_SOCIAL_OPTIONS; track opt.value) {
+                        <option [value]="opt.value">{{ opt.label }}</option>
+                      }
+                    </select>
+                  </div>
+                </div>
+              </div>
+  
+              <div class="form-section">
+                <h3 class="form-section__title">
+                  <svg lucideHome class="icon-14"></svg>
+                  Espacios adicionales
+                </h3>
+                <div class="toggle-row">
+                  <label class="toggle-chip" [class.toggle-chip--active]="propertyForm.get('alcoba_servicio')?.value">
+                    <input type="checkbox" formControlName="alcoba_servicio" />
+                    <span class="toggle-chip__dot"></span>
+                    Alcoba servicio
+                  </label>
+                  <label class="toggle-chip" [class.toggle-chip--active]="propertyForm.get('cuarto_util')?.value">
+                    <input type="checkbox" formControlName="cuarto_util" />
+                    <span class="toggle-chip__dot"></span>
+                    Cuarto útil
+                  </label>
+                  <label class="toggle-chip" [class.toggle-chip--active]="propertyForm.get('patio')?.value">
+                    <input type="checkbox" formControlName="patio" />
+                    <span class="toggle-chip__dot"></span>
+                    Patio
+                  </label>
+                  <label class="toggle-chip" [class.toggle-chip--active]="propertyForm.get('zona_ropa')?.value">
+                    <input type="checkbox" formControlName="zona_ropa" />
+                    <span class="toggle-chip__dot"></span>
+                    Zona de ropa
+                  </label>
+                  <label class="toggle-chip" [class.toggle-chip--active]="propertyForm.get('balcon')?.value">
+                    <input type="checkbox" formControlName="balcon" />
+                    <span class="toggle-chip__dot"></span>
+                    Balcón
+                  </label>
+                  <label class="toggle-chip" [class.toggle-chip--active]="propertyForm.get('terraza')?.value">
+                    <input type="checkbox" formControlName="terraza" />
+                    <span class="toggle-chip__dot"></span>
+                    Terraza
+                  </label>
+                  <label class="toggle-chip" [class.toggle-chip--active]="propertyForm.get('solar')?.value">
+                    <input type="checkbox" formControlName="solar" />
+                    <span class="toggle-chip__dot"></span>
+                    Solar
+                  </label>
+                  <label class="toggle-chip" [class.toggle-chip--active]="propertyForm.get('sotano')?.value">
+                    <input type="checkbox" formControlName="sotano" />
+                    <span class="toggle-chip__dot"></span>
+                    Sótano
+                  </label>
+                </div>
+              </div>
+            </div>
+          }
+  
+          <!-- ════════════════════════ -->
+          <!--  STEP 4: Equipamiento   -->
+          <!-- ════════════════════════ -->
+          @if (formStep() === 4) {
+            <div class="step-content">
+              <div class="form-section">
+                <h3 class="form-section__title">
+                  <svg lucideCar class="icon-14"></svg>
+                  Parqueo y almacenamiento
+                </h3>
+                <div class="form-grid form-grid--3">
+                  <div class="form-group">
+                    <label class="form-label">Parqueadero</label>
+                    <div class="pre-inventario-toggle">
+                      <label class="switch">
+                        <input type="checkbox" formControlName="parqueadero" />
+                        <span class="switch__slider"></span>
+                      </label>
+                      <span class="pre-inventario-toggle__label">
+                        {{ propertyForm.get('parqueadero')?.value ? 'Sí' : 'No' }}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="numero_closets">Closets</label>
+                    <input
+                      class="form-input"
+                      type="number"
+                      id="numero_closets"
+                      formControlName="numero_closets"
+                      min="0"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="numero_llaves">Llaves</label>
+                    <input
+                      class="form-input"
+                      type="number"
+                      id="numero_llaves"
+                      formControlName="numero_llaves"
+                      min="0"
+                    />
+                  </div>
+                </div>
+              </div>
+  
+              <div class="form-section">
+                <h3 class="form-section__title">
+                  <svg lucideZap class="icon-14"></svg>
+                  Servicios
+                </h3>
+                <div class="toggle-row">
+                  <label class="toggle-chip" [class.toggle-chip--active]="propertyForm.get('luz_trifilar')?.value">
+                    <input type="checkbox" formControlName="luz_trifilar" />
+                    <span class="toggle-chip__dot"></span>
+                    Luz trifilar
+                  </label>
+                  <label class="toggle-chip" [class.toggle-chip--active]="propertyForm.get('gas')?.value">
+                    <input type="checkbox" formControlName="gas" />
+                    <span class="toggle-chip__dot"></span>
+                    Gas
+                  </label>
+                  <label class="toggle-chip" [class.toggle-chip--active]="propertyForm.get('calentador')?.value">
+                    <input type="checkbox" formControlName="calentador" />
+                    <span class="toggle-chip__dot"></span>
+                    Calentador
+                  </label>
+                </div>
+              </div>
+  
+              <div class="form-section">
+                <h3 class="form-section__title">
+                  <svg lucideChefHat class="icon-14"></svg>
+                  Cocina y acabados
+                </h3>
+                <div class="form-grid form-grid--2">
+                  <div class="form-group">
+                    <label class="form-label" for="tipo_cocina">Tipo de cocina</label>
+                    <select class="form-select" id="tipo_cocina" formControlName="tipo_cocina">
+                      @for (opt of TIPO_COCINA_OPTIONS; track opt.value) {
+                        <option [value]="opt.value">{{ opt.label }}</option>
+                      }
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="tipo_piso">Tipo de piso</label>
+                    <select class="form-select" id="tipo_piso" formControlName="tipo_piso">
+                      @for (opt of TIPO_PISO_OPTIONS; track opt.value) {
+                        <option [value]="opt.value">{{ opt.label }}</option>
+                      }
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+  
+          <!-- ════════════════════════ -->
+          <!--  STEP 5: Relaciones     -->
+          <!-- ════════════════════════ -->
+          @if (formStep() === 5) {
+            <div class="step-content">
+              <!-- Propietarios -->
+              <div class="form-section">
+                <h3 class="form-section__title">
+                  <svg lucideUsers class="icon-14"></svg>
+                  Propietarios
+                </h3>
+                <div class="owner-picker">
+                  <!-- Selected tags -->
+                  <div class="owner-picker__selected">
+                    @if (selectedOwnerIds().length === 0) {
+                      <span class="owner-picker__empty">Ningún propietario seleccionado</span>
+                    }
+                    @for (ownerId of selectedOwnerIds(); track ownerId) {
+                      @let owner = getOwnerById(ownerId);
+                      @if (owner) {
+                        <span class="owner-picker__tag">
+                          {{ owner.name }}
+                          <button
+                            type="button"
+                            class="owner-picker__tag-remove"
+                            (click)="removeOwner(ownerId)"
+                          >
+                            <svg lucideX class="icon-12"></svg>
+                          </button>
+                        </span>
+                      }
+                    }
+                  </div>
+  
+                  <!-- Search -->
+                  <div class="owner-picker__search">
+                    <input
+                      type="text"
+                      placeholder="Buscar propietario por nombre o cédula..."
+                      [ngModel]="ownerSearchTerm()"
+                      (ngModelChange)="onOwnerSearch($event)"
+                      [ngModelOptions]="{ standalone: true }"
+                    />
+                  </div>
+  
+                  <!-- List -->
+                  <div class="owner-picker__list">
+                    @for (owner of filteredOwners(); track owner.id) {
+                      <div
+                        class="owner-picker__item"
+                        [class.owner-picker__item--selected]="isOwnerSelected(owner.id)"
+                        (click)="toggleOwner(owner.id)"
+                      >
+                        <span
+                          class="owner-picker__checkbox"
+                          [class.owner-picker__checkbox--checked]="isOwnerSelected(owner.id)"
+                        >
+                          @if (isOwnerSelected(owner.id)) {
+                            <svg lucideCheck class="icon-12"></svg>
+                          }
+                        </span>
+                        <div class="owner-picker__item-info">
+                          <span class="owner-picker__item-name">{{ owner.name }}</span>
+                          <span class="owner-picker__item-cedula">{{ owner.cedula }}</span>
+                        </div>
+                      </div>
+                    }
+                    @if (filteredOwners().length === 0) {
+                      <div class="owner-picker__no-results">
+                        No se encontraron propietarios
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+  
+              <!-- Asesor -->
+              <div class="form-section">
+                <h3 class="form-section__title">
+                  <svg lucideUser class="icon-14"></svg>
+                  Asesor asignado
+                </h3>
+                <div class="form-grid form-grid--1">
+                  <div class="form-group">
+                    <label class="form-label" for="asesor">Asesor</label>
+                    <select class="form-select" id="asesor" formControlName="asesor">
+                      <option [ngValue]="null">Sin asignar</option>
+                      @for (member of teamMembers(); track member.id) {
+                        <option [ngValue]="member.id">
+                          {{ member.first_name }} {{ member.last_name }}
+                          @if (!member.first_name && !member.last_name) {
+                            {{ member.username }}
+                          }
+                        </option>
+                      }
+                    </select>
+                    <span class="form-hint">Usuario del equipo responsable de esta propiedad</span>
+                  </div>
+                </div>
+              </div>
+  
+              <!-- Observaciones -->
+              <div class="form-section">
+                <h3 class="form-section__title">
+                  <svg lucideFileText class="icon-14"></svg>
+                  Observaciones
+                </h3>
+                <div class="form-grid form-grid--2">
+                  <div class="form-group">
+                    <label class="form-label" for="observacion">Observación</label>
+                    <textarea
+                      class="form-textarea"
+                      id="observacion"
+                      formControlName="observacion"
+                      placeholder="Estado general, características especiales..."
+                      rows="3"
+                    ></textarea>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="novedad">Novedad</label>
+                    <textarea
+                      class="form-textarea"
+                      id="novedad"
+                      formControlName="novedad"
+                      placeholder="Novedades pendientes, reparaciones..."
+                      rows="3"
+                    ></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+  
+        <!-- Card actions (wizard nav) -->
+        <div class="card__actions">
+          <div class="form-nav">
+            <div class="form-nav__left">
+              @if (formStep() > 1) {
+                <button type="button" class="btn btn--ghost" (click)="prevStep()">
+                  <svg lucideArrowLeft class="icon-15"></svg>
+                  Anterior
+                </button>
+              }
+              <button type="button" class="btn btn--ghost" (click)="cancelForm()">
+                Cancelar
+              </button>
+            </div>
+  
+            <span class="form-nav__step-indicator">
+              Paso {{ formStep() }} de {{ TOTAL_STEPS }}
+            </span>
+  
+            <div class="form-nav__right">
+              @if (formStep() < TOTAL_STEPS) {
+                <button
+                  type="button"
+                  class="btn btn--primary"
+                  (click)="nextStep()"
+                  [disabled]="!canGoNext()"
+                >
+                  Siguiente
+                  <svg lucideArrowRight class="icon-15"></svg>
+                </button>
+              } @else {
+                <button
+                  type="submit"
+                  class="btn btn--primary"
+                  [disabled]="propertyForm.invalid"
+                >
+                  <svg lucideCheck class="icon-15"></svg>
+                  {{ isEditing() ? 'Actualizar propiedad' : 'Registrar propiedad' }}
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+      </form>
+    }
+  
+    <!-- ═══════════════════════════════════ -->
+    <!--  TOOLBAR                           -->
+    <!-- ═══════════════════════════════════ -->
+    <div class="toolbar">
+      <div class="toolbar__search">
+        <svg lucideSearch class="toolbar__search-icon"></svg>
+        <input
+          class="toolbar__search-input"
+          type="text"
+          placeholder="Buscar por código, dirección, sector..."
+          [ngModel]="searchTerm()"
+          (ngModelChange)="onSearchChange($event)"
+        />
+        @if (searchTerm()) {
+          <button class="toolbar__search-clear" (click)="onSearchChange('')">
+            <svg lucideX class="icon-14"></svg>
+          </button>
+        }
+      </div>
+  
+      <button
+        class="btn btn--ghost"
+        (click)="toggleFilters()"
+        [class.btn--active]="showFilters() || activeFiltersCount() > 0"
+      >
+        <svg lucideFilter class="icon-15"></svg>
+        Filtros
+        @if (activeFiltersCount() > 0) {
+          <span class="filter-count">{{ activeFiltersCount() }}</span>
+        }
+      </button>
+    </div>
+  
+    <!-- ═══════════════════════════════════ -->
+    <!--  FILTERS PANEL                     -->
+    <!-- ═══════════════════════════════════ -->
+    @if (showFilters()) {
+      <div class="filters-panel">
+        <div class="filters-panel__grid">
+          <div class="form-group">
+            <label class="form-label">Estrato</label>
+            <select
+              class="form-select"
+              [ngModel]="filterEstrato()"
+              (ngModelChange)="filterEstrato.set($event); onFilterChange()"
+            >
+              <option value="">Todos</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Pre-inventario</label>
+            <select
+              class="form-select"
+              [ngModel]="filterPreInventario()"
+              (ngModelChange)="filterPreInventario.set($event); onFilterChange()"
+            >
+              <option value="">Todos</option>
+              <option value="true">Sí</option>
+              <option value="false">No</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Sector</label>
+            <input
+              class="form-input"
+              type="text"
+              placeholder="Buscar sector..."
+              [ngModel]="filterSector()"
+              (ngModelChange)="filterSector.set($event); onFilterChange()"
+            />
+          </div>
+        </div>
+        @if (activeFiltersCount() > 0) {
+          <button class="btn btn--link" (click)="clearFilters()">
+            <svg lucideX class="icon-14"></svg>
+            Limpiar filtros
+          </button>
+        }
+      </div>
+    }
+  
+    <!-- ═══════════════════════════════════ -->
+    <!--  LOADING                           -->
+    <!-- ═══════════════════════════════════ -->
+    @if (isLoading()) {
+      <div class="card">
+        <div class="loading-state">
+          <svg lucideRefreshCw class="icon-20 spin"></svg>
+          <p>Cargando propiedades...</p>
+        </div>
+      </div>
+    }
+  
+    <!-- ═══════════════════════════════════ -->
+    <!--  LISTA                             -->
+    <!-- ═══════════════════════════════════ -->
+    @if (!isLoading()) {
+      <div class="properties-list">
+        @for (prop of properties(); track prop.id) {
+          <div
+            class="prop-card"
+            [class.prop-card--expanded]="isExpanded(prop.id)"
+            [class.prop-card--preinv]="prop.pre_inventario"
+            [class.prop-card--deleting]="deletingId() === prop.id"
+          >
+            <!-- Main row -->
+            <div class="prop-card__main" (click)="toggleExpand(prop.id)">
+              <!-- Code block -->
+              <div class="prop-card__code-block">
+                <span class="prop-card__code">{{ prop.codigo }}</span>
+              </div>
+  
+              <!-- Content -->
+              <div class="prop-card__content">
+                <div class="prop-card__top-row">
+                  <p class="prop-card__address">{{ prop.direccion }}</p>
+                  <div class="prop-card__price-badges">
+                    @if (prop.pre_inventario) {
+                      <span class="price-badge price-badge--preinv">Pre-inv</span>
+                    }
+                    @if (prop.precio_arriendo) {
+                      <span class="price-badge price-badge--arriendo">
+                        {{ formatCurrency(prop.precio_arriendo) }}
+                      </span>
+                    }
+                    @if (prop.precio_venta) {
+                      <span class="price-badge price-badge--venta">
+                        {{ formatCurrency(prop.precio_venta) }}
+                      </span>
+                    }
+                  </div>
+                </div>
+                <div class="prop-card__details-row">
+                  @if (prop.sector) {
+                    <span class="prop-card__detail">
+                      <svg lucideMapPin class="icon-12"></svg>
+                      {{ prop.sector }}
+                    </span>
+                  }
+                  @if (prop.alcobas > 0) {
+                    <span class="prop-card__detail">
+                      <svg lucideBedDouble class="icon-12"></svg>
+                      <strong>{{ prop.alcobas }}</strong> alc.
+                    </span>
+                  }
+                  @if (prop.banos > 0) {
+                    <span class="prop-card__detail">
+                      <svg lucideShowerHead class="icon-12"></svg>
+                      <strong>{{ prop.banos }}</strong> baños
+                    </span>
+                  }
+                  @if (prop.area) {
+                    <span class="prop-card__detail">
+                      <svg lucideRuler class="icon-12"></svg>
+                      {{ prop.area }} m²
+                    </span>
+                  }
+                  @if (prop.estrato) {
+                    <span class="prop-card__detail">
+                      Est. <strong>{{ prop.estrato }}</strong>
+                    </span>
+                  }
+                  @if (prop.parqueadero) {
+                    <span class="prop-card__detail">
+                      <svg lucideCar class="icon-12"></svg>
+                      Parq.
+                    </span>
+                  }
+                  @if (prop.numero_llaves > 0) {
+                    <span class="prop-card__detail">
+                      <svg lucideKey class="icon-12"></svg>
+                      {{ prop.numero_llaves }}
+                    </span>
+                  }
+                </div>
+              </div>
+  
+              <!-- Expand -->
+              <button class="prop-card__expand-btn" aria-label="Ver detalles">
+                @if (isExpanded(prop.id)) {
+                  <svg lucideChevronUp class="icon-16"></svg>
+                } @else {
+                  <svg lucideChevronDown class="icon-16"></svg>
+                }
+              </button>
+            </div>
+  
+            <!-- Expanded detail -->
+            @if (isExpanded(prop.id)) {
+              <div class="prop-card__expanded">
+                <!-- Info grid -->
+                <div class="info-grid">
+                  <div class="info-item">
+                    <span class="info-item__label">
+                      <svg lucideHash class="icon-12"></svg> Código
+                    </span>
+                    <span class="info-item__value info-item__value--mono">{{ prop.codigo }}</span>
+                  </div>
+                  <div class="info-item">
+                    <span class="info-item__label">
+                      <svg lucideMapPin class="icon-12"></svg> Dirección
+                    </span>
+                    <span class="info-item__value">{{ prop.direccion }}</span>
+                  </div>
+                  @if (prop.sector) {
+                    <div class="info-item">
+                      <span class="info-item__label">
+                        <svg lucideBuilding class="icon-12"></svg> Sector
+                      </span>
+                      <span class="info-item__value">{{ prop.sector }}</span>
+                    </div>
+                  }
+                  @if (prop.punto_referencia) {
+                    <div class="info-item">
+                      <span class="info-item__label">
+                        <svg lucideInfo class="icon-12"></svg> Referencia
+                      </span>
+                      <span class="info-item__value">{{ prop.punto_referencia }}</span>
+                    </div>
+                  }
+                  @if (prop.precio_arriendo) {
+                    <div class="info-item">
+                      <span class="info-item__label">
+                        <svg lucideDollarSign class="icon-12"></svg> Arriendo
+                      </span>
+                      <span class="info-item__value info-item__value--accent">
+                        {{ formatCurrency(prop.precio_arriendo) }}
+                      </span>
+                    </div>
+                  }
+                  @if (prop.precio_venta) {
+                    <div class="info-item">
+                      <span class="info-item__label">
+                        <svg lucideDollarSign class="icon-12"></svg> Venta
+                      </span>
+                      <span class="info-item__value info-item__value--success">
+                        {{ formatCurrency(prop.precio_venta) }}
+                      </span>
+                    </div>
+                  }
+                  @if (prop.area) {
+                    <div class="info-item">
+                      <span class="info-item__label">
+                        <svg lucideRuler class="icon-12"></svg> Área
+                      </span>
+                      <span class="info-item__value">{{ prop.area }} m²</span>
+                    </div>
+                  }
+                  @if (prop.piso_numero !== null && prop.piso_numero !== undefined) {
+                    <div class="info-item">
+                      <span class="info-item__label">
+                        <svg lucideBuilding class="icon-12"></svg> Piso
+                      </span>
+                      <span class="info-item__value">{{ prop.piso_numero }}</span>
+                    </div>
+                  }
+                  @if (prop.estrato) {
+                    <div class="info-item">
+                      <span class="info-item__label">Estrato</span>
+                      <span class="info-item__value">{{ prop.estrato }}</span>
+                    </div>
+                  }
+                  <div class="info-item">
+                    <span class="info-item__label">
+                      <svg lucideBedDouble class="icon-12"></svg> Alcobas
+                    </span>
+                    <span class="info-item__value">{{ prop.alcobas }}</span>
+                  </div>
+                  <div class="info-item">
+                    <span class="info-item__label">
+                      <svg lucideBath class="icon-12"></svg> Baños
+                    </span>
+                    <span class="info-item__value">{{ prop.banos }}</span>
+                  </div>
+                  @if (prop.tipo_zona_social && prop.tipo_zona_social !== 'ninguno') {
+                    <div class="info-item">
+                      <span class="info-item__label">Zona social</span>
+                      <span class="info-item__value">{{ getZonaSocialLabel(prop.tipo_zona_social) }}</span>
+                    </div>
+                  }
+                  @if (prop.numero_closets > 0) {
+                    <div class="info-item">
+                      <span class="info-item__label">
+                        <svg lucidePackage class="icon-12"></svg> Closets
+                      </span>
+                      <span class="info-item__value">{{ prop.numero_closets }}</span>
+                    </div>
+                  }
+                  @if (prop.numero_llaves > 0) {
+                    <div class="info-item">
+                      <span class="info-item__label">
+                        <svg lucideKey class="icon-12"></svg> Llaves
+                      </span>
+                      <span class="info-item__value">{{ prop.numero_llaves }}</span>
+                    </div>
+                  }
+                  @if (prop.tipo_cocina) {
+                    <div class="info-item">
+                      <span class="info-item__label">
+                        <svg lucideChefHat class="icon-12"></svg> Cocina
+                      </span>
+                      <span class="info-item__value">{{ getCocinaLabel(prop.tipo_cocina) }}</span>
+                    </div>
+                  }
+                  @if (prop.tipo_piso) {
+                    <div class="info-item">
+                      <span class="info-item__label">Piso</span>
+                      <span class="info-item__value">{{ getPisoLabel(prop.tipo_piso) }}</span>
+                    </div>
+                  }
+                  <div class="info-item">
+                    <span class="info-item__label">
+                      <svg lucideUser class="icon-12"></svg> Asesor
+                    </span>
+                    <span class="info-item__value">{{ prop.asesor_display || '—' }}</span>
+                  </div>
+                  <div class="info-item">
+                    <span class="info-item__label">
+                      <svg lucideUser class="icon-12"></svg> Creado por
+                    </span>
+                    <span class="info-item__value">{{ prop.created_by_display }}</span>
+                  </div>
+                </div>
+  
+                <!-- Feature tags -->
+                @if (getBooleanTags(prop).length > 0) {
+                  <div class="prop-card__tags">
+                    @for (tag of getBooleanTags(prop); track tag) {
+                      <span class="feature-tag">{{ tag }}</span>
+                    }
+                  </div>
+                }
+  
+                <!-- Propietarios -->
+                @if (prop.propietarios_detail && prop.propietarios_detail.length > 0) {
+                  <div class="prop-card__owners">
+                    <span class="prop-card__owners-label">
+                      <svg lucideUsers class="icon-12"></svg>
+                      Propietarios ({{ prop.propietarios_detail.length }})
+                    </span>
+                    <div class="prop-card__owners-list">
+                      @for (owner of prop.propietarios_detail; track owner.id) {
+                        <span class="prop-card__owner-chip">
+                          <svg lucideUser class="icon-12"></svg>
+                          {{ owner.name }} · {{ owner.cedula }}
+                        </span>
+                      }
+                    </div>
+                  </div>
+                }
+  
+                <!-- Observaciones -->
+                @if (prop.observacion) {
+                  <div class="prop-card__notes">
+                    <span class="prop-card__notes-label">
+                      <svg lucideFileText class="icon-12"></svg> Observación
+                    </span>
+                    <p class="prop-card__notes-text">{{ prop.observacion }}</p>
+                  </div>
+                }
+                @if (prop.novedad) {
+                  <div class="prop-card__notes">
+                    <span class="prop-card__notes-label">
+                      <svg lucideInfo class="icon-12"></svg> Novedad
+                    </span>
+                    <p class="prop-card__notes-text">{{ prop.novedad }}</p>
+                  </div>
+                }
+  
+                <!-- Actions -->
+                <div class="prop-card__actions">
+                  @if (deletingId() === prop.id) {
+                    <div class="confirm-delete">
+                      <span class="confirm-delete__text">¿Eliminar esta propiedad?</span>
+                      <button class="btn btn--danger btn--sm" (click)="deleteProperty(prop.id)">
+                        Eliminar
+                      </button>
+                      <button class="btn btn--ghost btn--sm" (click)="cancelDelete()">
+                        Cancelar
+                      </button>
+                    </div>
+                  } @else {
+                    <button
+                      class="btn btn--ghost btn--sm"
+                      (click)="editProperty(prop); $event.stopPropagation()"
+                    >
+                      <svg lucidePencil class="icon-13"></svg>
+                      Editar
+                    </button>
+                    <button
+                      class="btn btn--danger-ghost btn--sm"
+                      (click)="confirmDelete(prop.id); $event.stopPropagation()"
+                    >
+                      <svg lucideTrash2 class="icon-13"></svg>
+                      Eliminar
+                    </button>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+  
+        <!-- Empty -->
+        @if (properties().length === 0) {
+          <div class="card">
+            <div class="empty-list">
+              <svg lucideHome class="icon-40 empty-list__icon"></svg>
+              <h3 class="empty-list__title">No hay propiedades</h3>
+              <p class="empty-list__text">
+                @if (searchTerm() || activeFiltersCount() > 0) {
+                  No se encontraron propiedades con los filtros aplicados.
+                } @else {
+                  Aún no se han registrado propiedades. ¡Registra la primera!
+                }
+              </p>
+              @if (searchTerm() || activeFiltersCount() > 0) {
+                <button class="btn btn--ghost btn--sm" (click)="clearFilters()">
+                  Limpiar filtros
+                </button>
+              } @else {
+                <button class="btn btn--primary btn--sm" (click)="openCreateForm()">
+                  <svg lucidePlus class="icon-14"></svg>
+                  Nueva propiedad
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+  
+      <!-- ═══════════════════════════════════ -->
+      <!--  PAGINATION                        -->
+      <!-- ═══════════════════════════════════ -->
+      @if (totalPages() > 1) {
+        <div class="pagination">
+          <button class="pagination__btn" [disabled]="!hasPrevPage()" (click)="prevPage()">
+            <svg lucideChevronLeft class="icon-16"></svg>
+          </button>
+          @for (page of getVisiblePages(); track page) {
+            <button
+              class="pagination__btn"
+              [class.pagination__btn--active]="page === currentPage()"
+              (click)="goToPage(page)"
+            >
+              {{ page }}
+            </button>
+          }
+          <button class="pagination__btn" [disabled]="!hasNextPage()" (click)="nextPage()">
+            <svg lucideChevronRight class="icon-16"></svg>
+          </button>
+          <span class="pagination__info">Página {{ currentPage() }} de {{ totalPages() }}</span>
+        </div>
+      }
+    }
+  
+    <!-- ═══════════════════════════════════ -->
+    <!--  TOASTS                            -->
+    <!-- ═══════════════════════════════════ -->
+    @if (message()) {
+      <div class="toast toast--success" role="status">
+        <svg lucideCircleCheck class="icon-17"></svg>
+        <span>{{ message() }}</span>
+      </div>
+    }
+    @if (error()) {
+      <div class="toast toast--error" role="alert">
+        <svg lucideCircleX class="icon-17"></svg>
+        <span>{{ error() }}</span>
+      </div>
+    }
+  </div>

@@ -18,7 +18,8 @@ import {
   LucideChevronRight,
   LucideMenu,
   LucideActivity,
-  LucideUserCheck,       
+  LucideUserCheck,
+  LucideBuilding,          // ← NUEVO
 } from '@lucide/angular';
 
 interface NavItem {
@@ -42,7 +43,8 @@ interface NavItem {
     LucideMenu,
     LucideDynamicIcon,
     LucideActivity,
-    LucideUserCheck,      
+    LucideUserCheck,
+    LucideBuilding,          // ← NUEVO
   ],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.scss'
@@ -52,8 +54,9 @@ export class SidebarComponent implements OnInit, OnDestroy {
   navItems: NavItem[] = [
     { label: 'Contratos',           route: '/contratos',           icon: LucideFileText },
     { label: 'Citas',               route: '/citas',               icon: LucideCalendarDays },
+    { label: 'Propiedades',         route: '/propiedades',         icon: LucideBuilding },    // ← NUEVO
     { label: 'Propiedades activas', route: '/propiedades-activas', icon: LucideHome },
-    { label: 'Propietarios',        route: '/propietarios',        icon: LucideUserCheck },  
+    { label: 'Propietarios',        route: '/propietarios',        icon: LucideUserCheck },
     { label: 'Chatbot',             route: '/chatbot',             icon: LucideMessageSquare },
   ];
 

@@ -3,7 +3,8 @@ import { MainLayoutComponent } from './layout/main-layout.component';
 import { ContratosComponent } from './pages/contratos/contratos.component';
 import { CitasComponent } from './pages/citas/citas.component';
 import { PropiedadesActivasComponent } from './pages/propiedades-activas/propiedades-activas.component';
-import { PropietariosComponent } from './pages/propietarios/propietarios.component';  // ← NUEVO
+import { PropietariosComponent } from './pages/propietarios/propietarios.component';
+import { PropiedadesComponent } from './pages/propiedades/propiedades.component';       // ← NUEVO
 import { ChatbotComponent } from './pages/chatbot/chatbot';
 import { UsuariosComponent } from './pages/usuarios/usuarios.component';
 import { CompaniesComponent } from './pages/companies/companies.component';
@@ -21,8 +22,9 @@ export const routes: Routes = [
       { path: '', redirectTo: 'contratos', pathMatch: 'full' },
       { path: 'contratos', component: ContratosComponent },
       { path: 'citas', component: CitasComponent },
+      { path: 'propiedades', component: PropiedadesComponent },
       { path: 'propiedades-activas', component: PropiedadesActivasComponent },
-      { path: 'propietarios', component: PropietariosComponent },           // ← NUEVO
+      { path: 'propietarios', component: PropietariosComponent },
       { path: 'chatbot', component: ChatbotComponent },
       { path: 'usuarios', redirectTo: 'administracion/usuarios', pathMatch: 'full' },
       { path: 'administracion/usuarios', component: UsuariosComponent },
