@@ -58,6 +58,7 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
   //  que el navegador aplicó :-webkit-autofill a los inputs
   // ──────────────────────────────────────────────────────
   ngAfterViewInit(): void {
+    // ─── Detectar autofill vía pseudo-clase CSS ───
     this.ngZone.runOutsideAngular(() => {
       let checks = 0;
       this.autofillCheckTimer = setInterval(() => {
@@ -70,12 +71,25 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
           });
           this.clearAutofillTimer();
         }
-        // Dejar de buscar después de ~5 segundos
         if (checks >= 25) {
           this.clearAutofillTimer();
         }
       }, 200);
     });
+  
+    // ──────────────────────────────────────────────────
+    //  FIX: Cuando el usuario escribe/borra manualmente,
+    //  apagar el flag autofilled para que la validación
+    //  normal del form retome el control del botón.
+    // ──────────────────────────────────────────────────
+    this.form.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        if (this.autofilled) {
+          this.autofilled = false;
+          this.cdr.detectChanges();
+        }
+      });
   }
 
   /**
