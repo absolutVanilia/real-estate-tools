@@ -1,12 +1,15 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 
 from .serializers import ChatMessageSerializer
 from .services.openai_service import ask_llm
 
 
 class ChatbotView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def post(self, request):
         serializer = ChatMessageSerializer(data=request.data)
 

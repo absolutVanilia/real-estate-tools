@@ -1,5 +1,6 @@
 from pathlib import Path
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from docxtpl import DocxTemplate
@@ -25,6 +26,7 @@ MONTHS_ES = {
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def generate_contract(request):
 
     # Get the data from the request
