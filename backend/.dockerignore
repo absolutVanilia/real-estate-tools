@@ -26,3 +26,6 @@ media/
 Thumbs.db
 docker-compose*.yml
 README.md
+aws/
+frontend/session-manager-plugin.deb
+backend/awscliv2.zip

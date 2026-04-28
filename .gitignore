@@ -303,3 +303,6 @@ e2e/*.map
 *.tsbuildinfo
 node_modules/
 dist/
+aws/
+frontend/session-manager-plugin.deb
+backend/awscliv2.zip
