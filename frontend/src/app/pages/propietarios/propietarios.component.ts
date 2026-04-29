@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { OwnersService, Owner, OwnerFilters } from '../../services/owners.service';
 import { AuthService } from '../../services/auth.service';
 import { ToastService } from '../../shared/components/toast';
+import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 
 import {
   LucideSearch,
@@ -31,6 +32,7 @@ import {
   selector: 'app-propietarios',
   standalone: true,
   imports: [
+    PageHeaderComponent,
     CommonModule,
     ReactiveFormsModule,
     FormsModule,

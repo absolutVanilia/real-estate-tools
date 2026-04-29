@@ -1,0 +1,17 @@
+<header class="page-header">
+    <div class="page-header__info">
+      <h1 class="page-header__title">
+        <!-- Slot opcional para ícono antes del título -->
+        <ng-content select="[titleIcon]"></ng-content>
+        {{ title }}
+      </h1>
+      @if (description) {
+        <p class="page-header__desc">{{ description }}</p>
+      }
+    </div>
+  
+    <div class="page-header__actions">
+      <!-- Slot default: botones de acción -->
+      <ng-content></ng-content>
+    </div>
+  </header>

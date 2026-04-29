@@ -1,10 +1,9 @@
 <div class="companies">
   <!-- Header -->
-  <header class="page-header">
-    <div class="page-header__info">
-      <h1 class="page-header__title">Compañías</h1>
-      <p class="page-header__desc">Gestiona las compañías registradas en la plataforma</p>
-    </div>
+  <app-page-header
+    title="Compañías"
+    description="Gestiona las compañías registradas en la plataforma"
+  >
     @if (isPlatformAdmin()) {
       <button class="btn btn--primary" (click)="toggleForm()">
         @if (showForm()) {
@@ -15,7 +14,7 @@
         <span>{{ showForm() ? 'Cancelar' : 'Nueva compañía' }}</span>
       </button>
     }
-  </header>
+  </app-page-header>
 
   <!-- Sin permisos -->
   @if (!isPlatformAdmin()) {

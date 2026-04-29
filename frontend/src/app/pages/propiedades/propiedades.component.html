@@ -1,32 +1,27 @@
 <div class="propiedades">
 
-    <!-- ═══════════════════════════════════ -->
-    <!--  HEADER                            -->
-    <!-- ═══════════════════════════════════ -->
-    <header class="page-header">
-      <div class="page-header__info">
-        <h1 class="page-header__title">Propiedades</h1>
-        <p class="page-header__desc">Registra y gestiona el inventario de inmuebles</p>
-      </div>
-      <div class="page-header__actions">
-        <button
-          class="btn btn--ghost btn--icon-only"
-          (click)="loadProperties()"
-          title="Recargar"
-          [disabled]="isLoading()"
-        >
-          <svg lucideRefreshCw class="icon-16" [class.spin]="isLoading()"></svg>
-        </button>
-        <button class="btn btn--primary" (click)="toggleForm()">
-          @if (showForm()) {
-            <svg lucideX class="icon-16"></svg>
-          } @else {
-            <svg lucidePlus class="icon-16"></svg>
-          }
-          <span>{{ showForm() ? 'Cancelar' : 'Nueva propiedad' }}</span>
-        </button>
-      </div>
-    </header>
+    <!-- Header -->
+    <app-page-header
+      title="Propiedades"
+      description="Registra y gestiona el inventario de inmuebles"
+    >
+      <button
+        class="btn btn--ghost btn--icon-only"
+        (click)="loadProperties()"
+        title="Recargar"
+        [disabled]="isLoading()"
+      >
+        <svg lucideRefreshCw class="icon-16" [class.spin]="isLoading()"></svg>
+      </button>
+      <button class="btn btn--primary" (click)="toggleForm()">
+        @if (showForm()) {
+          <svg lucideX class="icon-16"></svg>
+        } @else {
+          <svg lucidePlus class="icon-16"></svg>
+        }
+        <span>{{ showForm() ? 'Cancelar' : 'Nueva propiedad' }}</span>
+      </button>
+    </app-page-header>
   
     <!-- ═══════════════════════════════════ -->
     <!--  STATS                             -->

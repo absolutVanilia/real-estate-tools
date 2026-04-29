@@ -1,29 +1,26 @@
 <div class="citas">
     <!-- Header -->
-    <header class="page-header">
-      <div class="page-header__info">
-        <h1 class="page-header__title">Citas</h1>
-        <p class="page-header__desc">Agenda y gestiona las visitas a propiedades</p>
-      </div>
-      <div class="page-header__actions">
-        <button
-          class="btn btn--ghost btn--icon-only"
-          (click)="loadAppointments()"
-          title="Recargar"
-          [disabled]="isLoading()"
-        >
-          <svg lucideRefreshCw class="icon-16" [class.spin]="isLoading()"></svg>
-        </button>
-        <button class="btn btn--primary" (click)="toggleForm()">
-          @if (showForm()) {
-            <svg lucideX class="icon-16"></svg>
-          } @else {
-            <svg lucidePlus class="icon-16"></svg>
-          }
-          <span>{{ showForm() ? 'Cancelar' : 'Agendar cita' }}</span>
-        </button>
-      </div>
-    </header>
+    <app-page-header
+      title="Citas"
+      description="Agenda y gestiona las visitas a propiedades"
+    >
+      <button
+        class="btn btn--ghost btn--icon-only"
+        (click)="loadAppointments()"
+        title="Recargar"
+        [disabled]="isLoading()"
+      >
+        <svg lucideRefreshCw class="icon-16" [class.spin]="isLoading()"></svg>
+      </button>
+      <button class="btn btn--primary" (click)="toggleForm()">
+        @if (showForm()) {
+          <svg lucideX class="icon-16"></svg>
+        } @else {
+          <svg lucidePlus class="icon-16"></svg>
+        }
+        <span>{{ showForm() ? 'Cancelar' : 'Agendar cita' }}</span>
+      </button>
+    </app-page-header>
   
     <!-- Stats rápidas -->
     <div class="stats-row">

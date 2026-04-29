@@ -1,10 +1,9 @@
 <div class="usuarios">
   <!-- Header -->
-  <header class="page-header">
-    <div class="page-header__info">
-      <h1 class="page-header__title">Gestión de usuarios</h1>
-      <p class="page-header__desc">Administra los usuarios y sus roles dentro de la plataforma</p>
-    </div>
+  <app-page-header
+    title="Gestión de usuarios"
+    description="Administra los usuarios y sus roles dentro de la plataforma"
+  >
     @if (canManageUsers) {
       <button class="btn btn--primary" (click)="toggleForm()">
         @if (showForm()) {
@@ -15,7 +14,7 @@
         <span>{{ showForm() ? 'Cancelar' : 'Nuevo usuario' }}</span>
       </button>
     }
-  </header>
+  </app-page-header>
 
   <!-- Formulario crear / editar -->
   @if (canManageUsers && showForm()) {

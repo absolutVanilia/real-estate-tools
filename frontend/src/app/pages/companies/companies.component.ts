@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 import { CompaniesService, Company } from '../../services/companies.service';
 import { ToastService } from '../../shared/components/toast';
+import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 
 import {
   LucideBuilding2,
@@ -20,6 +21,7 @@ import {
   selector: 'app-companies',
   standalone: true,
   imports: [
+    PageHeaderComponent,
     CommonModule,
     ReactiveFormsModule,
     FormsModule,

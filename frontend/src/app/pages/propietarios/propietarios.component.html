@@ -1,29 +1,26 @@
 <div class="propietarios">
     <!-- Header -->
-    <header class="page-header">
-      <div class="page-header__info">
-        <h1 class="page-header__title">Propietarios</h1>
-        <p class="page-header__desc">Registra y gestiona los propietarios de inmuebles</p>
-      </div>
-      <div class="page-header__actions">
-        <button
-          class="btn btn--ghost btn--icon-only"
-          (click)="loadOwners()"
-          title="Recargar"
-          [disabled]="isLoading()"
-        >
-          <svg lucideRefreshCw class="icon-16" [class.spin]="isLoading()"></svg>
-        </button>
-        <button class="btn btn--primary" (click)="toggleForm()">
-          @if (showForm()) {
-            <svg lucideX class="icon-16"></svg>
-          } @else {
-            <svg lucidePlus class="icon-16"></svg>
-          }
-          <span>{{ showForm() ? 'Cancelar' : 'Nuevo propietario' }}</span>
-        </button>
-      </div>
-    </header>
+    <app-page-header
+      title="Propietarios"
+      description="Registra y gestiona los propietarios de inmuebles"
+    >
+      <button
+        class="btn btn--ghost btn--icon-only"
+        (click)="loadOwners()"
+        title="Recargar"
+        [disabled]="isLoading()"
+      >
+        <svg lucideRefreshCw class="icon-16" [class.spin]="isLoading()"></svg>
+      </button>
+      <button class="btn btn--primary" (click)="toggleForm()">
+        @if (showForm()) {
+          <svg lucideX class="icon-16"></svg>
+        } @else {
+          <svg lucidePlus class="icon-16"></svg>
+        }
+        <span>{{ showForm() ? 'Cancelar' : 'Nuevo propietario' }}</span>
+      </button>
+    </app-page-header>
   
     <!-- Stats rápidas -->
     <div class="stats-row">

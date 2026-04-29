@@ -8,6 +8,7 @@ import {
 } from '../../services/audit-logs.service';
 import { AuthService } from '../../services/auth.service';
 import { ToastService } from '../../shared/components/toast';
+import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 
 import {
   LucideActivity,
@@ -42,6 +43,7 @@ import {
   selector: 'app-logs',
   standalone: true,
   imports: [
+    PageHeaderComponent,
     CommonModule,
     FormsModule,
     LucideActivity,

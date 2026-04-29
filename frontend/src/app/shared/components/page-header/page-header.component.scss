@@ -1,0 +1,68 @@
+@use 'variables' as v;
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+
+  &__info {
+    min-width: 0;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: v.$neutral-900;
+    letter-spacing: -0.025em;
+    line-height: 1.25;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  &__desc {
+    margin: 0.25rem 0 0;
+    font-size: 0.84rem;
+    color: v.$secondary;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+
+    &:empty {
+      display: none;
+    }
+  }
+}
+
+// ─── Responsive ───
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    gap: 0.875rem;
+  }
+
+  .page-header__title {
+    font-size: 1.3rem;
+  }
+
+  .page-header__actions {
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .page-header__title {
+    font-size: 1.2rem;
+  }
+
+  .page-header__desc {
+    font-size: 0.8rem;
+  }
+}

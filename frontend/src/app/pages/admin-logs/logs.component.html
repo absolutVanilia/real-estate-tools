@@ -1,33 +1,24 @@
 <div class="logs">
     <!-- Header -->
-    <header class="page-header">
-      <div class="page-header__info">
-        <h1 class="page-header__title">
-          <svg lucideActivity class="icon-24 icon-accent"></svg>
-          Registro de actividad
-        </h1>
-        <p class="page-header__desc">
-          @if (isPlatformAdmin()) {
-            Historial completo de todas las acciones en la plataforma
-          } @else {
-            Historial de acciones en tu compañía
-          }
-        </p>
-      </div>
-  
+    <app-page-header
+      title="Registro de actividad"
+      [description]="isPlatformAdmin()
+        ? 'Historial completo de todas las acciones en la plataforma'
+        : 'Historial de acciones en tu compañía'"
+    >
+      <svg lucideActivity titleIcon class="icon-24 icon-accent"></svg>
+    
       @if (hasAccess()) {
-        <div class="page-header__actions">
-          <button
-            class="btn btn--ghost btn--icon-only"
-            (click)="loadLogs()"
-            title="Recargar"
-            [disabled]="isLoading()"
-          >
-            <svg lucideRefreshCw class="icon-16" [class.spin]="isLoading()"></svg>
-          </button>
-        </div>
+        <button
+          class="btn btn--ghost btn--icon-only"
+          (click)="loadLogs()"
+          title="Recargar"
+          [disabled]="isLoading()"
+        >
+          <svg lucideRefreshCw class="icon-16" [class.spin]="isLoading()"></svg>
+        </button>
       }
-    </header>
+    </app-page-header>
   
     <!-- Sin acceso -->
     @if (!hasAccess()) {

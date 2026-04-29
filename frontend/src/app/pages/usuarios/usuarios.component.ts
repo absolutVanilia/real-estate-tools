@@ -6,6 +6,8 @@ import { AuthService } from '../../services/auth.service';
 import { CompaniesService, Company } from '../../services/companies.service';
 import { UserItem, UsersService, UserRole } from '../../services/users.service';
 import { ToastService } from '../../shared/components/toast';
+import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
+
 
 import {
   LucideUsers,
@@ -26,6 +28,7 @@ import {
   selector: 'app-usuarios',
   standalone: true,
   imports: [
+    PageHeaderComponent,
     CommonModule,
     ReactiveFormsModule,
     FormsModule,

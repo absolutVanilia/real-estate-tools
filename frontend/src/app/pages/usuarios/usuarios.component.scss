@@ -19,31 +19,6 @@
   animation: fadeIn 0.3s ease;
 }
 
-// ─── Page Header ───
-.page-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1.75rem;
-  flex-wrap: wrap;
-
-  &__title {
-    margin: 0;
-    font-size: 1.5rem;
-    font-weight: 800;
-    color: v.$neutral-900;
-    letter-spacing: -0.025em;
-    line-height: 1.25;
-  }
-
-  &__desc {
-    margin: 0.25rem 0 0;
-    font-size: 0.84rem;
-    color: v.$secondary;
-  }
-}
-
 // ─── Card ───
 .card {
   background: #fff;
