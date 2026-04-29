@@ -1,10 +1,11 @@
-import { Component, OnInit, signal, computed, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 import { CompaniesService, Company } from '../../services/companies.service';
 import { UserItem, UsersService, UserRole } from '../../services/users.service';
+import { ToastService } from '../../shared/components/toast';
 
 import {
   LucideUsers,
@@ -15,13 +16,10 @@ import {
   LucideX,
   LucidePencil,
   LucideTrash2,
-  LucideCircleCheck,
-  LucideCircleX,
-  LucideShieldAlert,
   LucideCalendarDays,
   LucideBuilding2,
   LucideEye,
-  LucideLock
+  LucideLock,
 } from '@lucide/angular';
 
 @Component({
@@ -39,23 +37,25 @@ import {
     LucideX,
     LucidePencil,
     LucideTrash2,
-    LucideCircleCheck,
-    LucideCircleX,
-    LucideShieldAlert,
     LucideCalendarDays,
     LucideBuilding2,
     LucideEye,
-    LucideLock
+    LucideLock,
   ],
   templateUrl: './usuarios.component.html',
-  styleUrl: './usuarios.component.scss'
+  styleUrl: './usuarios.component.scss',
 })
 export class UsuariosComponent implements OnInit {
+  // ─── Services ───
+  private fb = inject(FormBuilder);
+  private authService = inject(AuthService);
+  private usersService = inject(UsersService);
+  private companiesService = inject(CompaniesService);
+  private toast = inject(ToastService);
+
   // ─── Signals ───
   users = signal<UserItem[]>([]);
   companies = signal<Company[]>([]);
-  message = signal('');
-  error = signal('');
   showForm = signal(false);
   editingUserId = signal<number | null>(null);
   searchTerm = signal('');
@@ -64,7 +64,14 @@ export class UsuariosComponent implements OnInit {
 
   // ─── Form ───
   roles: UserRole[] = ['admin', 'promotor'];
-  userForm: FormGroup;
+  userForm: FormGroup = this.fb.group({
+    first_name: ['', Validators.required],
+    last_name: ['', Validators.required],
+    username: ['', Validators.required],
+    password: ['', [Validators.required, Validators.minLength(8)]],
+    role: ['promotor', Validators.required],
+    company: [null as number | null],
+  });
 
   // ─── Computed ───
   isEditing = computed(() => this.editingUserId() !== null);
@@ -73,31 +80,15 @@ export class UsuariosComponent implements OnInit {
     const term = this.searchTerm().toLowerCase().trim();
     const list = this.users();
     if (!term) return list;
-    return list.filter(u =>
-      u.first_name.toLowerCase().includes(term) ||
-      u.last_name.toLowerCase().includes(term) ||
-      u.username.toLowerCase().includes(term) ||
-      u.role.toLowerCase().includes(term) ||
-      u.id.toString().includes(term)
+    return list.filter(
+      (u) =>
+        u.first_name.toLowerCase().includes(term) ||
+        u.last_name.toLowerCase().includes(term) ||
+        u.username.toLowerCase().includes(term) ||
+        u.role.toLowerCase().includes(term) ||
+        u.id.toString().includes(term)
     );
   });
-
-  constructor(
-    private fb: FormBuilder,
-    private authService: AuthService,
-    private usersService: UsersService,
-    private companiesService: CompaniesService,
-    private cdr: ChangeDetectorRef
-  ) {
-    this.userForm = this.fb.group({
-      first_name: ['', Validators.required],
-      last_name: ['', Validators.required],
-      username: ['', Validators.required],
-      password: ['', [Validators.required, Validators.minLength(8)]],
-      role: ['promotor', Validators.required],
-      company: [null as number | null]
-    });
-  }
 
   // ─── Auth getters ───
   get canManageUsers(): boolean {
@@ -127,12 +118,10 @@ export class UsuariosComponent implements OnInit {
     this.companiesService.list().subscribe({
       next: (data) => {
         this.companies.set(data);
-        this.cdr.markForCheck();
       },
       error: () => {
-        this.error.set('No se pudo cargar las compañías.');
-        this.cdr.markForCheck();
-      }
+        this.toast.error('No se pudo cargar las compañías.');
+      },
     });
   }
 
@@ -142,13 +131,11 @@ export class UsuariosComponent implements OnInit {
       next: (data) => {
         this.users.set(data);
         this.isLoading.set(false);
-        this.cdr.markForCheck();
       },
       error: () => {
-        this.error.set('No se pudo cargar la lista de usuarios.');
+        this.toast.error('No se pudo cargar la lista de usuarios.');
         this.isLoading.set(false);
-        this.cdr.markForCheck();
-      }
+      },
     });
   }
 
@@ -171,7 +158,7 @@ export class UsuariosComponent implements OnInit {
       username: user.username,
       password: '',
       role: user.role,
-      company: user.company
+      company: user.company,
     });
 
     this.userForm.get('password')?.clearValidators();
@@ -203,9 +190,6 @@ export class UsuariosComponent implements OnInit {
   onSubmitUser(): void {
     if (this.userForm.invalid) return;
 
-    this.error.set('');
-    this.message.set('');
-
     if (this.isEditing()) {
       this.updateUser();
     } else {
@@ -219,7 +203,7 @@ export class UsuariosComponent implements OnInit {
       last_name: this.userForm.value.last_name,
       username: this.userForm.value.username,
       password: this.userForm.value.password,
-      role: this.userForm.value.role as UserRole
+      role: this.userForm.value.role as UserRole,
     } as any;
 
     if (this.isPlatformAdmin) {
@@ -228,18 +212,14 @@ export class UsuariosComponent implements OnInit {
 
     this.usersService.create(payload).subscribe({
       next: () => {
-        this.message.set('Usuario creado exitosamente.');
+        this.toast.success('Usuario creado exitosamente.');
         this.resetUserForm();
         this.showForm.set(false);
         this.loadUsers();
-        this.cdr.markForCheck();
-        setTimeout(() => { this.message.set(''); this.cdr.markForCheck(); }, 4000);
       },
       error: () => {
-        this.error.set('No se pudo crear el usuario.');
-        this.cdr.markForCheck();
-        setTimeout(() => { this.error.set(''); this.cdr.markForCheck(); }, 5000);
-      }
+        this.toast.error('No se pudo crear el usuario.');
+      },
     });
   }
 
@@ -251,7 +231,7 @@ export class UsuariosComponent implements OnInit {
       first_name: this.userForm.value.first_name,
       last_name: this.userForm.value.last_name,
       username: this.userForm.value.username,
-      role: this.userForm.value.role as UserRole
+      role: this.userForm.value.role as UserRole,
     } as any;
 
     if (this.userForm.value.password) {
@@ -264,17 +244,13 @@ export class UsuariosComponent implements OnInit {
 
     this.usersService.update(id, payload).subscribe({
       next: () => {
-        this.message.set('Usuario actualizado exitosamente.');
+        this.toast.success('Usuario actualizado exitosamente.');
         this.cancelEdit();
         this.loadUsers();
-        this.cdr.markForCheck();
-        setTimeout(() => { this.message.set(''); this.cdr.markForCheck(); }, 4000);
       },
       error: () => {
-        this.error.set('No se pudo actualizar el usuario.');
-        this.cdr.markForCheck();
-        setTimeout(() => { this.error.set(''); this.cdr.markForCheck(); }, 5000);
-      }
+        this.toast.error('No se pudo actualizar el usuario.');
+      },
     });
   }
 
@@ -290,22 +266,16 @@ export class UsuariosComponent implements OnInit {
   deleteUser(userId: number): void {
     if (!this.canManageUsers) return;
 
-    this.error.set('');
-    this.message.set('');
     this.deletingUserId.set(null);
 
     this.usersService.remove(userId).subscribe({
       next: () => {
-        this.message.set('Usuario eliminado.');
+        this.toast.success('Usuario eliminado.');
         this.loadUsers();
-        this.cdr.markForCheck();
-        setTimeout(() => { this.message.set(''); this.cdr.markForCheck(); }, 4000);
       },
       error: () => {
-        this.error.set('No se pudo eliminar el usuario.');
-        this.cdr.markForCheck();
-        setTimeout(() => { this.error.set(''); this.cdr.markForCheck(); }, 5000);
-      }
+        this.toast.error('No se pudo eliminar el usuario.');
+      },
     });
   }
 
@@ -318,7 +288,7 @@ export class UsuariosComponent implements OnInit {
 
   getCompanyName(companyId: number | null): string {
     if (!companyId) return '—';
-    const found = this.companies().find(c => c.id === companyId);
+    const found = this.companies().find((c) => c.id === companyId);
     return found ? found.name : `#${companyId}`;
   }
 
@@ -329,7 +299,7 @@ export class UsuariosComponent implements OnInit {
       username: '',
       password: '',
       role: 'promotor',
-      company: null
+      company: null,
     });
     this.userForm.get('password')?.setValidators([Validators.required, Validators.minLength(8)]);
     this.userForm.get('password')?.updateValueAndValidity();

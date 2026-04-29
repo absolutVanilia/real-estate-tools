@@ -1,10 +1,8 @@
-import {
+  import {
     Component,
     OnInit,
-    OnDestroy,
     signal,
     computed,
-    effect,
     DestroyRef,
     inject,
   } from '@angular/core';
@@ -16,21 +14,16 @@ import {
     Validators,
   } from '@angular/forms';
   import { FormsModule } from '@angular/forms';
-  import { toSignal, toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
+  import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
   import {
     Subject,
     switchMap,
     debounceTime,
     distinctUntilChanged,
     tap,
-    combineLatest,
     startWith,
-    map,
     catchError,
     of,
-    merge,
-    timer,
-    take,
   } from 'rxjs';
   
   import {
@@ -42,6 +35,7 @@ import {
   } from '../../services/properties.service';
   import { OwnersService, Owner } from '../../services/owners.service';
   import { AuthService } from '../../services/auth.service';
+  import { ToastService } from '../../shared/components/toast';
   
   import {
     LucideSearch, LucideFilter, LucidePlus, LucideX, LucideCheck,
@@ -61,11 +55,6 @@ import {
   interface StepDef {
     num: number;
     label: string;
-  }
-  
-  interface ToastMessage {
-    text: string;
-    type: 'success' | 'error';
   }
   
   // ═══════════════════════════════════
@@ -101,6 +90,7 @@ import {
     private ownersService = inject(OwnersService);
     private authService = inject(AuthService);
     private destroyRef = inject(DestroyRef);
+    private toast = inject(ToastService);
   
     // ═══════════════════════════════════
     //  CORE STATE (Signals)
@@ -114,18 +104,6 @@ import {
     deletingId = signal<number | null>(null);
     showFilters = signal(false);
     formStep = signal(1);
-  
-    // ─── Toast unificado (resuelve bug #13) ───
-    private toast = signal<ToastMessage | null>(null);
-    message = computed(() => {
-      const t = this.toast();
-      return t?.type === 'success' ? t.text : '';
-    });
-    error = computed(() => {
-      const t = this.toast();
-      return t?.type === 'error' ? t.text : '';
-    });
-    private toastTimer: ReturnType<typeof setTimeout> | null = null;
   
     // ─── Filters (Signals) ───
     searchTerm = signal('');
@@ -261,7 +239,6 @@ import {
       this.initForm();
       this.setupSearchDebounce();
       this.setupLoadPipeline();
-      this.setupToastCleanup();
     }
   
     // ═══════════════════════════════════
@@ -363,12 +340,11 @@ import {
       this.loadTrigger$.pipe(
         tap(() => {
           this.isLoading.set(true);
-          this.clearToast();
         }),
         switchMap(() =>
           this.propertiesService.list(this.currentFilters()).pipe(
             catchError(() => {
-              this.showError('No se pudieron cargar las propiedades.');
+              this.toast.error('No se pudieron cargar las propiedades.');
               return of(null);
             })
           )
@@ -380,18 +356,6 @@ import {
           this.totalCount.set(res.count);
         }
         this.isLoading.set(false);
-      });
-    }
-  
-    /**
-     * Bug #13 resuelto: Auto-limpieza del toast con cleanup en destroyRef.
-     */
-    private setupToastCleanup(): void {
-      this.destroyRef.onDestroy(() => {
-        if (this.toastTimer) {
-          clearTimeout(this.toastTimer);
-          this.toastTimer = null;
-        }
       });
     }
   
@@ -418,7 +382,7 @@ import {
       this.ownersService.list({ page_size: 500, is_active: 'true' } as any).pipe(
         takeUntilDestroyed(this.destroyRef),
         catchError(() => {
-          this.showError('No se pudieron cargar los propietarios.');
+          this.toast.error('No se pudieron cargar los propietarios.');
           return of(null);
         }),
       ).subscribe(res => {
@@ -430,7 +394,7 @@ import {
       this.propertiesService.getTeamMembers().pipe(
         takeUntilDestroyed(this.destroyRef),
         catchError(() => {
-          this.showError('No se pudieron cargar los asesores.');
+          this.toast.error('No se pudieron cargar los asesores.');
           return of(null);
         }),
       ).subscribe((res: any) => {
@@ -615,8 +579,6 @@ import {
         return;
       }
   
-      this.clearToast();
-  
       const raw = this.propertyForm.value;
       const payload: any = {
         ...raw,
@@ -639,7 +601,7 @@ import {
           const msg = this.isEditing()
             ? 'Propiedad actualizada exitosamente.'
             : 'Propiedad registrada exitosamente.';
-          this.showToast(msg);
+          this.toast.success(msg);
           this.cancelForm();
           this.loadProperties();
         },
@@ -699,11 +661,11 @@ import {
         takeUntilDestroyed(this.destroyRef),
       ).subscribe({
         next: () => {
-          this.showToast('Propiedad eliminada.');
+          this.toast.success('Propiedad eliminada.');
           this.loadProperties();
         },
         error: () => {
-          this.showError('No se pudo eliminar la propiedad.');
+          this.toast.error('No se pudo eliminar la propiedad.');
         },
       });
     }
@@ -727,7 +689,7 @@ import {
       this.propertiesService.get(id).pipe(
         takeUntilDestroyed(this.destroyRef),
         catchError(() => {
-          this.showError('No se pudo cargar el detalle de la propiedad.');
+          this.toast.error('No se pudo cargar el detalle de la propiedad.');
           return of(null);
         }),
       ).subscribe(full => {
@@ -835,38 +797,6 @@ import {
       return full || m.username;
     }
   
-    // ═══════════════════════════════════
-    //  TOAST SYSTEM (Bug #13 resuelto)
-    // ═══════════════════════════════════
-  
-    private clearToast(): void {
-      if (this.toastTimer) {
-        clearTimeout(this.toastTimer);
-        this.toastTimer = null;
-      }
-      this.toast.set(null);
-    }
-  
-    /**
-     * Timer auto-limpiado en destroyRef.onDestroy (setupToastCleanup)
-     */
-    private showToast(msg: string): void {
-      this.clearToast();
-      this.toast.set({ text: msg, type: 'success' });
-      this.toastTimer = setTimeout(() => {
-        this.toast.set(null);
-        this.toastTimer = null;
-      }, 4000);
-    }
-  
-    private showError(msg: string): void {
-      this.clearToast();
-      this.toast.set({ text: msg, type: 'error' });
-      this.toastTimer = setTimeout(() => {
-        this.toast.set(null);
-        this.toastTimer = null;
-      }, 5000);
-    }
   
     private handleError(err: any, fallback: string): void {
       let msg = fallback;
@@ -883,6 +813,6 @@ import {
           }
         }
       }
-      this.showError(msg);
+      this.toast.error(msg);
     }
   }

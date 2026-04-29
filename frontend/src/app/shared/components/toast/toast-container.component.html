@@ -1,0 +1,39 @@
+<div class="toast-viewport" aria-live="polite" aria-relevant="additions">
+    @for (toast of toasts(); track toast.id) {
+      <div
+        class="toast"
+        [class.toast--success]="toast.type === 'success'"
+        [class.toast--error]="toast.type === 'error'"
+        [class.toast--warning]="toast.type === 'warning'"
+        [class.toast--info]="toast.type === 'info'"
+        [class.toast--leaving]="toast.leaving"
+        [attr.role]="toast.type === 'error' ? 'alert' : 'status'"
+        [style.--toast-duration]="toast.duration + 'ms'"
+      >
+        <!-- Icono -->
+        <div class="toast__icon">
+          @switch (toast.type) {
+            @case ('success') { <svg lucideCircleCheck class="icon-17"></svg> }
+            @case ('error')   { <svg lucideCircleX class="icon-17"></svg> }
+            @case ('warning') { <svg lucideTriangleAlert class="icon-17"></svg> }
+            @case ('info')    { <svg lucideInfo class="icon-17"></svg> }
+          }
+        </div>
+  
+        <!-- Mensaje -->
+        <span class="toast__message">{{ toast.message }}</span>
+  
+        <!-- Cerrar -->
+        <button
+          class="toast__close"
+          (click)="dismiss(toast.id)"
+          aria-label="Cerrar notificación"
+        >
+          <svg lucideX class="icon-14"></svg>
+        </button>
+  
+        <!-- Barra de progreso -->
+        <div class="toast__progress"></div>
+      </div>
+    }
+  </div>

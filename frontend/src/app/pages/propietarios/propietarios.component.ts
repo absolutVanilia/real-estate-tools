@@ -1,9 +1,10 @@
-import { Component, OnInit, signal, computed, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
 import { OwnersService, Owner, OwnerFilters } from '../../services/owners.service';
 import { AuthService } from '../../services/auth.service';
+import { ToastService } from '../../shared/components/toast';
 
 import {
   LucideSearch,
@@ -12,8 +13,6 @@ import {
   LucideX,
   LucideCheck,
   LucidePencil,
-  LucideCircleCheck,
-  LucideCircleX,
   LucidePhone,
   LucideUser,
   LucideChevronLeft,
@@ -24,8 +23,6 @@ import {
   LucideMail,
   LucideIdCard,
   LucideUsers,
-  LucideShieldCheck,
-  LucideShieldOff,
   LucideToggleLeft,
   LucideToggleRight,
 } from '@lucide/angular';
@@ -43,8 +40,6 @@ import {
     LucideX,
     LucideCheck,
     LucidePencil,
-    LucideCircleCheck,
-    LucideCircleX,
     LucidePhone,
     LucideUser,
     LucideChevronLeft,
@@ -55,8 +50,6 @@ import {
     LucideMail,
     LucideIdCard,
     LucideUsers,
-    LucideShieldCheck,
-    LucideShieldOff,
     LucideToggleLeft,
     LucideToggleRight,
   ],
@@ -64,12 +57,16 @@ import {
   styleUrl: './propietarios.component.scss',
 })
 export class PropietariosComponent implements OnInit {
+  // ─── Services ───
+  private fb = inject(FormBuilder);
+  private ownersService = inject(OwnersService);
+  private authService = inject(AuthService);
+  private toast = inject(ToastService);
+
   // ─── State ───
   owners = signal<Owner[]>([]);
   totalCount = signal(0);
   isLoading = signal(false);
-  message = signal('');
-  error = signal('');
   showForm = signal(false);
   editingId = signal<number | null>(null);
   expandedId = signal<number | null>(null);
@@ -82,7 +79,12 @@ export class PropietariosComponent implements OnInit {
   pageSize = signal(25);
 
   // ─── Form ───
-  ownerForm: FormGroup;
+  ownerForm: FormGroup = this.fb.group({
+    name: ['', Validators.required],
+    cedula: ['', Validators.required],
+    phone: [''],
+    email: ['', Validators.email],
+  });
 
   // ─── Computed ───
   isEditing = computed(() => this.editingId() !== null);
@@ -106,20 +108,6 @@ export class PropietariosComponent implements OnInit {
 
   private searchTimeout: any;
 
-  constructor(
-    private fb: FormBuilder,
-    private ownersService: OwnersService,
-    private authService: AuthService,
-    private cdr: ChangeDetectorRef
-  ) {
-    this.ownerForm = this.fb.group({
-      name: ['', Validators.required],
-      cedula: ['', Validators.required],
-      phone: [''],
-      email: ['', Validators.email],
-    });
-  }
-
   ngOnInit(): void {
     this.authService.refreshUserFromStorage();
     this.loadOwners();
@@ -128,7 +116,6 @@ export class PropietariosComponent implements OnInit {
   // ─── Data ───
   loadOwners(): void {
     this.isLoading.set(true);
-    this.error.set('');
 
     const filters: OwnerFilters = {
       page: this.currentPage(),
@@ -143,12 +130,10 @@ export class PropietariosComponent implements OnInit {
         this.owners.set(res.results);
         this.totalCount.set(res.count);
         this.isLoading.set(false);
-        this.cdr.markForCheck();
       },
       error: () => {
-        this.error.set('No se pudieron cargar los propietarios.');
+        this.toast.error('No se pudieron cargar los propietarios.');
         this.isLoading.set(false);
-        this.cdr.markForCheck();
       },
     });
   }
@@ -221,20 +206,15 @@ export class PropietariosComponent implements OnInit {
   onSubmit(): void {
     if (this.ownerForm.invalid) return;
 
-    this.error.set('');
-    this.message.set('');
-
     const payload = this.ownerForm.value;
 
     if (this.isEditing()) {
       const id = this.editingId()!;
       this.ownersService.update(id, payload).subscribe({
         next: () => {
-          this.message.set('Propietario actualizado exitosamente.');
+          this.toast.success('Propietario actualizado exitosamente.');
           this.cancelForm();
           this.loadOwners();
-          this.cdr.markForCheck();
-          setTimeout(() => { this.message.set(''); this.cdr.markForCheck(); }, 4000);
         },
         error: (err) => {
           this.handleError(err, 'No se pudo actualizar el propietario.');
@@ -243,11 +223,9 @@ export class PropietariosComponent implements OnInit {
     } else {
       this.ownersService.create(payload).subscribe({
         next: () => {
-          this.message.set('Propietario registrado exitosamente.');
+          this.toast.success('Propietario registrado exitosamente.');
           this.cancelForm();
           this.loadOwners();
-          this.cdr.markForCheck();
-          setTimeout(() => { this.message.set(''); this.cdr.markForCheck(); }, 4000);
         },
         error: (err) => {
           this.handleError(err, 'No se pudo registrar el propietario.');
@@ -261,9 +239,7 @@ export class PropietariosComponent implements OnInit {
     if (err?.error?.cedula) {
       msg = 'Ya existe un propietario con esta cédula en su compañía.';
     }
-    this.error.set(msg);
-    this.cdr.markForCheck();
-    setTimeout(() => { this.error.set(''); this.cdr.markForCheck(); }, 5000);
+    this.toast.error(msg);
   }
 
   // ─── Toggle active ───
@@ -271,15 +247,11 @@ export class PropietariosComponent implements OnInit {
     this.ownersService.toggleActive(owner.id).subscribe({
       next: () => {
         const newState = owner.is_active ? 'inactivo' : 'activo';
-        this.message.set(`Propietario marcado como ${newState}.`);
+        this.toast.success(`Propietario marcado como ${newState}.`);
         this.loadOwners();
-        this.cdr.markForCheck();
-        setTimeout(() => { this.message.set(''); this.cdr.markForCheck(); }, 3000);
       },
       error: () => {
-        this.error.set('No se pudo cambiar el estado del propietario.');
-        this.cdr.markForCheck();
-        setTimeout(() => { this.error.set(''); this.cdr.markForCheck(); }, 5000);
+        this.toast.error('No se pudo cambiar el estado del propietario.');
       },
     });
   }

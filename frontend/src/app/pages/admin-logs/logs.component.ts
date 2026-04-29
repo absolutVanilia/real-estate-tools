@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, computed, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
@@ -7,6 +7,7 @@ import {
   AuditLogFilters,
 } from '../../services/audit-logs.service';
 import { AuthService } from '../../services/auth.service';
+import { ToastService } from '../../shared/components/toast';
 
 import {
   LucideActivity,
@@ -16,7 +17,6 @@ import {
   LucideChevronUp,
   LucideChevronLeft,
   LucideChevronRight,
-  LucideCircleX,
   LucidePlus,
   LucidePencil,
   LucideTrash2,
@@ -51,7 +51,6 @@ import {
     LucideChevronUp,
     LucideChevronLeft,
     LucideChevronRight,
-    LucideCircleX,
     LucidePlus,
     LucidePencil,
     LucideTrash2,
@@ -76,11 +75,15 @@ import {
   styleUrl: './logs.component.scss',
 })
 export class LogsComponent implements OnInit {
+  // ─── Services ───
+  private auditLogsService = inject(AuditLogsService);
+  private authService = inject(AuthService);
+  private toast = inject(ToastService);
+
   // ─── State ───
   logs = signal<AuditLog[]>([]);
   totalCount = signal(0);
   isLoading = signal(false);
-  error = signal('');
   expandedLogId = signal<number | null>(null);
   showFilters = signal(false);
 
@@ -97,12 +100,14 @@ export class LogsComponent implements OnInit {
   currentPage = signal(1);
   pageSize = signal(25);
 
+  // ─── Auth state ───
+  isPlatformAdmin = signal(false);
+  hasAccess = signal(false);
+
   // ─── Computed ───
   totalPages = computed(() => Math.ceil(this.totalCount() / this.pageSize()));
   hasNextPage = computed(() => this.currentPage() < this.totalPages());
   hasPrevPage = computed(() => this.currentPage() > 1);
-  isPlatformAdmin = signal(false);
-  hasAccess = signal(false);
 
   activeFiltersCount = computed(() => {
     let count = 0;
@@ -115,12 +120,6 @@ export class LogsComponent implements OnInit {
 
   // ─── Search debounce ───
   private searchTimeout: any;
-
-  constructor(
-    private auditLogsService: AuditLogsService,
-    private authService: AuthService,
-    private cdr: ChangeDetectorRef
-  ) {}
 
   ngOnInit(): void {
     this.authService.refreshUserFromStorage();
@@ -138,7 +137,6 @@ export class LogsComponent implements OnInit {
   // ─── Data ───
   loadLogs(): void {
     this.isLoading.set(true);
-    this.error.set('');
 
     const filters: AuditLogFilters = {
       page: this.currentPage(),
@@ -163,12 +161,10 @@ export class LogsComponent implements OnInit {
           );
         }
         this.isLoading.set(false);
-        this.cdr.markForCheck();
       },
       error: () => {
-        this.error.set('No se pudieron cargar los logs.');
+        this.toast.error('No se pudieron cargar los logs.');
         this.isLoading.set(false);
-        this.cdr.markForCheck();
       },
     });
   }

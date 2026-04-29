@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, computed, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
@@ -8,6 +8,7 @@ import {
   AppointmentFilters,
 } from '../../services/appointments.service';
 import { AuthService } from '../../services/auth.service';
+import { ToastService } from '../../shared/components/toast';
 
 import {
   LucideCalendarDays,
@@ -72,12 +73,16 @@ import {
   styleUrl: './citas.component.scss',
 })
 export class CitasComponent implements OnInit {
+  // ─── Services ───
+  private fb = inject(FormBuilder);
+  private appointmentsService = inject(AppointmentsService);
+  private authService = inject(AuthService);
+  private toast = inject(ToastService);
+
   // ─── State ───
   appointments = signal<Appointment[]>([]);
   totalCount = signal(0);
   isLoading = signal(false);
-  message = signal('');
-  error = signal('');
   showForm = signal(false);
   editingId = signal<number | null>(null);
   expandedId = signal<number | null>(null);
@@ -93,7 +98,18 @@ export class CitasComponent implements OnInit {
   pageSize = signal(25);
 
   // ─── Form ───
-  appointmentForm: FormGroup;
+  appointmentForm: FormGroup = this.fb.group({
+    date: ['', Validators.required],
+    time: ['', Validators.required],
+    interested_name: ['', Validators.required],
+    interested_phone: [''],
+    property_address: ['', Validators.required],
+    sector: [''],
+    property_code: [''],
+    key_number: [''],
+    status: ['pendiente', Validators.required],
+    notes: [''],
+  });
 
   // ─── Computed ───
   isEditing = computed(() => this.editingId() !== null);
@@ -122,26 +138,6 @@ export class CitasComponent implements OnInit {
 
   private searchTimeout: any;
 
-  constructor(
-    private fb: FormBuilder,
-    private appointmentsService: AppointmentsService,
-    private authService: AuthService,
-    private cdr: ChangeDetectorRef
-  ) {
-    this.appointmentForm = this.fb.group({
-      date: ['', Validators.required],
-      time: ['', Validators.required],
-      interested_name: ['', Validators.required],
-      interested_phone: [''],
-      property_address: ['', Validators.required],
-      sector: [''],
-      property_code: [''],
-      key_number: [''],
-      status: ['pendiente', Validators.required],
-      notes: [''],
-    });
-  }
-
   ngOnInit(): void {
     this.authService.refreshUserFromStorage();
     this.loadAppointments();
@@ -150,7 +146,6 @@ export class CitasComponent implements OnInit {
   // ─── Data ───
   loadAppointments(): void {
     this.isLoading.set(true);
-    this.error.set('');
 
     const filters: AppointmentFilters = {
       page: this.currentPage(),
@@ -167,12 +162,10 @@ export class CitasComponent implements OnInit {
         this.appointments.set(res.results);
         this.totalCount.set(res.count);
         this.isLoading.set(false);
-        this.cdr.markForCheck();
       },
       error: () => {
-        this.error.set('No se pudieron cargar las citas.');
+        this.toast.error('No se pudieron cargar las citas.');
         this.isLoading.set(false);
-        this.cdr.markForCheck();
       },
     });
   }
@@ -259,40 +252,29 @@ export class CitasComponent implements OnInit {
   onSubmit(): void {
     if (this.appointmentForm.invalid) return;
 
-    this.error.set('');
-    this.message.set('');
-
     const payload = this.appointmentForm.value;
 
     if (this.isEditing()) {
       const id = this.editingId()!;
       this.appointmentsService.update(id, payload).subscribe({
         next: () => {
-          this.message.set('Cita actualizada exitosamente.');
+          this.toast.success('Cita actualizada exitosamente.');
           this.cancelForm();
           this.loadAppointments();
-          this.cdr.markForCheck();
-          setTimeout(() => { this.message.set(''); this.cdr.markForCheck(); }, 4000);
         },
         error: () => {
-          this.error.set('No se pudo actualizar la cita.');
-          this.cdr.markForCheck();
-          setTimeout(() => { this.error.set(''); this.cdr.markForCheck(); }, 5000);
+          this.toast.error('No se pudo actualizar la cita.');
         },
       });
     } else {
       this.appointmentsService.create(payload).subscribe({
         next: () => {
-          this.message.set('Cita agendada exitosamente.');
+          this.toast.success('Cita agendada exitosamente.');
           this.cancelForm();
           this.loadAppointments();
-          this.cdr.markForCheck();
-          setTimeout(() => { this.message.set(''); this.cdr.markForCheck(); }, 4000);
         },
         error: () => {
-          this.error.set('No se pudo agendar la cita.');
-          this.cdr.markForCheck();
-          setTimeout(() => { this.error.set(''); this.cdr.markForCheck(); }, 5000);
+          this.toast.error('No se pudo agendar la cita.');
         },
       });
     }
@@ -302,15 +284,11 @@ export class CitasComponent implements OnInit {
   updateStatus(appointment: Appointment, newStatus: string): void {
     this.appointmentsService.update(appointment.id, { status: newStatus }).subscribe({
       next: () => {
-        this.message.set(`Estado actualizado a "${this.getStatusLabel(newStatus)}".`);
+        this.toast.success(`Estado actualizado a "${this.getStatusLabel(newStatus)}".`);
         this.loadAppointments();
-        this.cdr.markForCheck();
-        setTimeout(() => { this.message.set(''); this.cdr.markForCheck(); }, 3000);
       },
       error: () => {
-        this.error.set('No se pudo actualizar el estado.');
-        this.cdr.markForCheck();
-        setTimeout(() => { this.error.set(''); this.cdr.markForCheck(); }, 5000);
+        this.toast.error('No se pudo actualizar el estado.');
       },
     });
   }
@@ -328,15 +306,11 @@ export class CitasComponent implements OnInit {
     this.deletingId.set(null);
     this.appointmentsService.remove(id).subscribe({
       next: () => {
-        this.message.set('Cita eliminada.');
+        this.toast.success('Cita eliminada.');
         this.loadAppointments();
-        this.cdr.markForCheck();
-        setTimeout(() => { this.message.set(''); this.cdr.markForCheck(); }, 4000);
       },
       error: () => {
-        this.error.set('No se pudo eliminar la cita.');
-        this.cdr.markForCheck();
-        setTimeout(() => { this.error.set(''); this.cdr.markForCheck(); }, 5000);
+        this.toast.error('No se pudo eliminar la cita.');
       },
     });
   }

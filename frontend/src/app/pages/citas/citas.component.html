@@ -523,17 +523,4 @@
       }
     }
   
-    <!-- Toasts -->
-    @if (message()) {
-      <div class="toast toast--success" role="status">
-        <svg lucideCircleCheck class="icon-17"></svg>
-        <span>{{ message() }}</span>
-      </div>
-    }
-    @if (error()) {
-      <div class="toast toast--error" role="alert">
-        <svg lucideCircleX class="icon-17"></svg>
-        <span>{{ error() }}</span>
-      </div>
-    }
   </div>

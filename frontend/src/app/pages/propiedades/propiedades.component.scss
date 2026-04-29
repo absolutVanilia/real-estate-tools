@@ -1248,31 +1248,6 @@
   }
 }
 
-// ─── Toast ───
-.toast {
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-  padding: 0.8rem 1.125rem;
-  border-radius: v.$radius-md;
-  font-size: 0.8rem;
-  font-weight: 500;
-  margin-top: 1.25rem;
-  animation: slideUp 0.3s ease;
-
-  &--success {
-    background: v.$success-bg;
-    color: darken(v.$success, 15%);
-    border: 1px solid rgba(v.$success, 0.18);
-  }
-
-  &--error {
-    background: v.$error-bg;
-    color: darken(v.$error, 8%);
-    border: 1px solid rgba(v.$error, 0.18);
-  }
-}
-
 // ─── Step Content Transition ───
 .step-content {
   animation: fadeIn 0.2s ease;
