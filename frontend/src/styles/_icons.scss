@@ -1,0 +1,25 @@
+// ═══════════════════════════════════════════
+//  ICON UTILITIES
+// ═══════════════════════════════════════════
+
+@use 'variables' as v;
+
+// ─── Base ───
+svg[class*='icon-'] {
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+// ─── Tamaños ───
+$icon-sizes: (12, 13, 14, 15, 16, 17, 18, 20, 24, 32, 40);
+
+@each $size in $icon-sizes {
+  .icon-#{$size} {
+    width: #{$size}px;
+    height: #{$size}px;
+  }
+}
+
+// ─── Colores ───
+.icon-accent { color: v.$accent; }

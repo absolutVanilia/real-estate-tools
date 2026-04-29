@@ -1,48 +1,11 @@
-// ─── Paleta ───
-$primary: #003f5c;
-$primary-hover: #005580;
-$secondary: #6c757d;
-$accent: #336699;
-$neutral-100: #f8f9fa;
-$neutral-150: #f1f3f5;
-$neutral-200: #e9ecef;
-$neutral-300: #dee2e6;
-$neutral-500: #adb5bd;
-$neutral-700: #495057;
-$neutral-900: #212529;
-$success: #28a745;
-$success-bg: #ecf8ee;
-$error: #dc3545;
-$error-bg: #fdecea;
-$warning-bg: #fff8e1;
-
-$radius-sm: 6px;
-$radius-md: 10px;
-$radius-lg: 14px;
-$shadow-card: 0 1px 4px rgba(0, 0, 0, 0.05), 0 2px 12px rgba(0, 0, 0, 0.03);
-$shadow-hover: 0 4px 20px rgba(0, 0, 0, 0.07);
-$ease: 0.2s ease;
+@use 'variables' as v;
 
 :host {
   display: block;
   width: 100%;
 }
 
-// ─── Icon utilities ───
-svg[class*="icon-"] {
-  display: inline-block;
-  vertical-align: middle;
-  flex-shrink: 0;
-}
-
-.icon-13 { width: 13px; height: 13px; }
-.icon-14 { width: 14px; height: 14px; }
-.icon-15 { width: 15px; height: 15px; }
-.icon-16 { width: 16px; height: 16px; }
-.icon-17 { width: 17px; height: 17px; }
-.icon-18 { width: 18px; height: 18px; }
-.icon-accent { color: $accent; }
-
+// ─── Icon inline (específico de este componente) ───
 .icon-inline {
   margin-right: 2px;
   vertical-align: -2px;
@@ -56,9 +19,7 @@ svg[class*="icon-"] {
   animation: fadeIn 0.3s ease;
 }
 
-// ═══════════════════════════
-//  PAGE HEADER
-// ═══════════════════════════
+// ─── Page Header ───
 .page-header {
   display: flex;
   align-items: flex-start;
@@ -71,7 +32,7 @@ svg[class*="icon-"] {
     margin: 0;
     font-size: 1.5rem;
     font-weight: 800;
-    color: $neutral-900;
+    color: v.$neutral-900;
     letter-spacing: -0.025em;
     line-height: 1.25;
   }
@@ -79,22 +40,20 @@ svg[class*="icon-"] {
   &__desc {
     margin: 0.25rem 0 0;
     font-size: 0.84rem;
-    color: $secondary;
+    color: v.$secondary;
   }
 }
 
-// ═══════════════════════════
-//  CARD
-// ═══════════════════════════
+// ─── Card ───
 .card {
   background: #fff;
-  border: 1px solid $neutral-200;
-  border-radius: $radius-lg;
-  box-shadow: $shadow-card;
+  border: 1px solid v.$neutral-200;
+  border-radius: v.$radius-lg;
+  box-shadow: v.$shadow-card;
   overflow: hidden;
-  transition: box-shadow $ease;
+  transition: box-shadow v.$ease;
 
-  &:hover { box-shadow: $shadow-hover; }
+  &:hover { box-shadow: v.$shadow-hover; }
   & + & { margin-top: 1.25rem; }
 
   &--form {
@@ -108,7 +67,7 @@ svg[class*="icon-"] {
     justify-content: space-between;
     gap: 1rem;
     padding: 1rem 1.375rem;
-    border-bottom: 1px solid $neutral-200;
+    border-bottom: 1px solid v.$neutral-200;
     flex-wrap: wrap;
   }
 
@@ -119,7 +78,7 @@ svg[class*="icon-"] {
     margin: 0;
     font-size: 0.9375rem;
     font-weight: 700;
-    color: $neutral-900;
+    color: v.$neutral-900;
   }
 
   &__body { padding: 1.25rem 1.375rem; }
@@ -130,14 +89,12 @@ svg[class*="icon-"] {
     justify-content: flex-end;
     gap: 0.625rem;
     padding: 0.875rem 1.375rem;
-    border-top: 1px solid $neutral-200;
-    background: $neutral-100;
+    border-top: 1px solid v.$neutral-200;
+    background: v.$neutral-100;
   }
 }
 
-// ═══════════════════════════
-//  BADGE
-// ═══════════════════════════
+// ─── Badge ───
 .badge {
   display: inline-flex;
   align-items: center;
@@ -146,15 +103,13 @@ svg[class*="icon-"] {
   height: 22px;
   padding: 0 7px;
   border-radius: 100px;
-  background: $primary;
+  background: v.$primary;
   color: #fff;
   font-size: 0.675rem;
   font-weight: 700;
 }
 
-// ═══════════════════════════
-//  SEARCH BOX
-// ═══════════════════════════
+// ─── Search Box ───
 .search-box {
   position: relative;
   display: flex;
@@ -165,35 +120,33 @@ svg[class*="icon-"] {
     left: 10px;
     width: 15px;
     height: 15px;
-    color: $neutral-500;
+    color: v.$neutral-500;
     pointer-events: none;
   }
 
   &__input {
     width: 200px;
     padding: 0.4rem 0.75rem 0.4rem 2rem;
-    border: 1px solid $neutral-300;
+    border: 1px solid v.$neutral-300;
     border-radius: 100px;
-    background: $neutral-100;
+    background: v.$neutral-100;
     font-size: 0.8rem;
-    color: $neutral-900;
+    color: v.$neutral-900;
     outline: none;
-    transition: all $ease;
+    transition: all v.$ease;
 
-    &::placeholder { color: $neutral-500; }
+    &::placeholder { color: v.$neutral-500; }
 
     &:focus {
-      border-color: $accent;
-      box-shadow: 0 0 0 3px rgba($accent, 0.1);
+      border-color: v.$accent;
+      box-shadow: 0 0 0 3px rgba(v.$accent, 0.1);
       background: #fff;
       width: 240px;
     }
   }
 }
 
-// ═══════════════════════════
-//  FORM
-// ═══════════════════════════
+// ─── Form ───
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -209,7 +162,7 @@ svg[class*="icon-"] {
 .form-label {
   font-size: 0.8rem;
   font-weight: 600;
-  color: $neutral-700;
+  color: v.$neutral-700;
   display: flex;
   align-items: center;
   gap: 0.25rem;
@@ -217,26 +170,26 @@ svg[class*="icon-"] {
 
 .form-hint {
   font-weight: 400;
-  color: $neutral-500;
+  color: v.$neutral-500;
   font-size: 0.725rem;
 }
 
 .form-input,
 .form-select {
-  border: 1px solid $neutral-300;
-  border-radius: $radius-md;
+  border: 1px solid v.$neutral-300;
+  border-radius: v.$radius-md;
   padding: 0.6rem 0.85rem;
   font-size: 0.875rem;
-  color: $neutral-900;
+  color: v.$neutral-900;
   background: #fff;
   outline: none;
-  transition: all $ease;
+  transition: all v.$ease;
 
-  &::placeholder { color: $neutral-500; }
+  &::placeholder { color: v.$neutral-500; }
 
   &:focus {
-    border-color: $accent;
-    box-shadow: 0 0 0 3px rgba($accent, 0.1);
+    border-color: v.$accent;
+    box-shadow: 0 0 0 3px rgba(v.$accent, 0.1);
   }
 }
 
@@ -251,13 +204,11 @@ svg[class*="icon-"] {
 
 .form-error {
   font-size: 0.725rem;
-  color: $error;
+  color: v.$error;
   font-weight: 500;
 }
 
-// ═══════════════════════════
-//  BUTTONS
-// ═══════════════════════════
+// ─── Buttons ───
 .btn {
   display: inline-flex;
   align-items: center;
@@ -267,18 +218,18 @@ svg[class*="icon-"] {
   font-size: 0.8rem;
   font-weight: 600;
   border: none;
-  border-radius: $radius-md;
+  border-radius: v.$radius-md;
   cursor: pointer;
   white-space: nowrap;
-  transition: all $ease;
+  transition: all v.$ease;
 
   &--primary {
-    background: $primary;
+    background: v.$primary;
     color: #fff;
 
     &:hover:not(:disabled) {
-      background: $primary-hover;
-      box-shadow: 0 2px 8px rgba($primary, 0.25);
+      background: v.$primary-hover;
+      box-shadow: 0 2px 8px rgba(v.$primary, 0.25);
     }
 
     &:disabled {
@@ -289,32 +240,32 @@ svg[class*="icon-"] {
 
   &--ghost {
     background: transparent;
-    color: $secondary;
-    border: 1px solid $neutral-300;
+    color: v.$secondary;
+    border: 1px solid v.$neutral-300;
 
     &:hover {
-      background: $neutral-150;
-      border-color: $neutral-500;
+      background: v.$neutral-150;
+      border-color: v.$neutral-500;
     }
   }
 
   &--danger {
-    background: $error;
+    background: v.$error;
     color: #fff;
 
     &:hover {
-      background: darken($error, 8%);
+      background: darken(v.$error, 8%);
     }
   }
 
   &--danger-ghost {
     background: transparent;
-    color: $error;
-    border: 1px solid rgba($error, 0.3);
+    color: v.$error;
+    border: 1px solid rgba(v.$error, 0.3);
 
     &:hover {
-      background: $error-bg;
-      border-color: $error;
+      background: v.$error-bg;
+      border-color: v.$error;
     }
   }
 
@@ -324,7 +275,7 @@ svg[class*="icon-"] {
   }
 }
 
-// Icon buttons (tabla)
+// ─── Icon Buttons (tabla) ───
 .btn-icon {
   display: inline-flex;
   align-items: center;
@@ -334,33 +285,33 @@ svg[class*="icon-"] {
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  transition: all $ease;
+  transition: all v.$ease;
   background: transparent;
 
   &--edit {
-    color: $accent;
+    color: v.$accent;
 
     &:hover {
-      background: rgba($accent, 0.08);
-      color: $primary;
+      background: rgba(v.$accent, 0.08);
+      color: v.$primary;
     }
   }
 
   &--danger {
-    color: $error;
+    color: v.$error;
 
     &:hover {
-      background: $error-bg;
-      color: darken($error, 8%);
+      background: v.$error-bg;
+      color: darken(v.$error, 8%);
     }
   }
 
   &--ghost {
-    color: $secondary;
+    color: v.$secondary;
 
     &:hover {
-      background: $neutral-150;
-      color: $neutral-900;
+      background: v.$neutral-150;
+      color: v.$neutral-900;
     }
   }
 }
@@ -371,9 +322,7 @@ svg[class*="icon-"] {
   align-items: center;
 }
 
-// ═══════════════════════════
-//  CONFIRM DELETE
-// ═══════════════════════════
+// ─── Confirm Delete ───
 .confirm-delete {
   display: inline-flex;
   align-items: center;
@@ -383,7 +332,7 @@ svg[class*="icon-"] {
   &__text {
     font-size: 0.7rem;
     font-weight: 600;
-    color: $error;
+    color: v.$error;
     white-space: nowrap;
   }
 
@@ -400,9 +349,7 @@ svg[class*="icon-"] {
   }
 }
 
-// ═══════════════════════════
-//  TABLE
-// ═══════════════════════════
+// ─── Table ───
 .table-wrap { overflow-x: auto; }
 
 .data-table {
@@ -416,35 +363,35 @@ svg[class*="icon-"] {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    color: $secondary;
-    background: $neutral-100;
-    border-bottom: 1px solid $neutral-200;
+    color: v.$secondary;
+    background: v.$neutral-100;
+    border-bottom: 1px solid v.$neutral-200;
     white-space: nowrap;
   }
 
   td {
     padding: 0.8rem 1.375rem;
     font-size: 0.85rem;
-    color: $neutral-900;
+    color: v.$neutral-900;
     vertical-align: middle;
   }
 
   tbody tr {
-    transition: background $ease;
-    border-bottom: 1px solid $neutral-200;
+    transition: background v.$ease;
+    border-bottom: 1px solid v.$neutral-200;
 
     &:last-child { border-bottom: none; }
-    &:hover { background: rgba($accent, 0.025); }
+    &:hover { background: rgba(v.$accent, 0.025); }
   }
 }
 
 .text-center { text-align: center; }
 
 .row--deleting {
-  background: rgba($error, 0.03) !important;
+  background: rgba(v.$error, 0.03) !important;
 }
 
-// User cell
+// ─── User Cell ───
 .user-cell {
   display: flex;
   align-items: center;
@@ -459,12 +406,12 @@ svg[class*="icon-"] {
   &__name {
     font-weight: 600;
     font-size: 0.85rem;
-    color: $neutral-900;
+    color: v.$neutral-900;
   }
 
   &__id {
     font-size: 0.675rem;
-    color: $neutral-500;
+    color: v.$neutral-500;
   }
 }
 
@@ -475,7 +422,7 @@ svg[class*="icon-"] {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: linear-gradient(135deg, $primary 0%, $accent 100%);
+  background: linear-gradient(135deg, v.$primary 0%, v.$accent 100%);
   color: #fff;
   font-size: 0.75rem;
   font-weight: 700;
@@ -489,19 +436,19 @@ svg[class*="icon-"] {
   }
 }
 
-// Username chip
+// ─── Username Chip ───
 .username-chip {
   display: inline-flex;
   padding: 0.15rem 0.5rem;
-  border-radius: $radius-sm;
-  background: $neutral-150;
-  color: $secondary;
+  border-radius: v.$radius-sm;
+  background: v.$neutral-150;
+  color: v.$secondary;
   font-size: 0.75rem;
   font-weight: 600;
   font-family: 'SF Mono', 'Fira Code', monospace;
 }
 
-// Role badge
+// ─── Role Badge ───
 .role-badge {
   display: inline-flex;
   align-items: center;
@@ -512,54 +459,52 @@ svg[class*="icon-"] {
   letter-spacing: 0.01em;
 
   &--admin {
-    background: rgba($primary, 0.08);
-    color: $primary;
+    background: rgba(v.$primary, 0.08);
+    color: v.$primary;
   }
 
   &--promotor {
-    background: rgba($accent, 0.08);
-    color: $accent;
+    background: rgba(v.$accent, 0.08);
+    color: v.$accent;
   }
 }
 
-// Company tag
+// ─── Company Tag ───
 .company-tag {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
   font-size: 0.8rem;
-  color: $secondary;
+  color: v.$secondary;
 }
 
-// Readonly badge
+// ─── Readonly Badge ───
 .readonly-badge {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
   font-size: 0.7rem;
-  color: $neutral-500;
+  color: v.$neutral-500;
   font-weight: 500;
 }
 
 .table-empty {
   padding: 2.5rem 1.5rem;
   text-align: center;
-  color: $secondary;
+  color: v.$secondary;
   font-size: 0.84rem;
 }
 
-// ═══════════════════════════
-//  MOBILE LIST
-// ═══════════════════════════
+// ─── Mobile List ───
 .mobile-list { display: none; }
 
 .mobile-item {
   padding: 1rem 1.25rem;
-  border-bottom: 1px solid $neutral-200;
+  border-bottom: 1px solid v.$neutral-200;
 
   &:last-child { border-bottom: none; }
 
-  &--deleting { background: rgba($error, 0.02); }
+  &--deleting { background: rgba(v.$error, 0.02); }
 
   &__top {
     display: flex;
@@ -579,7 +524,7 @@ svg[class*="icon-"] {
     margin: 0;
     font-size: 0.84rem;
     font-weight: 600;
-    color: $neutral-900;
+    color: v.$neutral-900;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -588,7 +533,7 @@ svg[class*="icon-"] {
   &__username {
     margin: 0.1rem 0 0;
     font-size: 0.7rem;
-    color: $secondary;
+    color: v.$secondary;
     font-family: 'SF Mono', 'Fira Code', monospace;
   }
 
@@ -598,14 +543,14 @@ svg[class*="icon-"] {
     gap: 0.75rem;
     margin-top: 0.625rem;
     padding-top: 0.5rem;
-    border-top: 1px dashed $neutral-200;
+    border-top: 1px dashed v.$neutral-200;
     font-size: 0.725rem;
-    color: $secondary;
+    color: v.$secondary;
   }
 
   &__id {
     font-size: 0.675rem;
-    color: $neutral-500;
+    color: v.$neutral-500;
     margin-left: auto;
   }
 
@@ -615,59 +560,36 @@ svg[class*="icon-"] {
     gap: 0.5rem;
     margin-top: 0.75rem;
     padding-top: 0.625rem;
-    border-top: 1px dashed $neutral-200;
+    border-top: 1px dashed v.$neutral-200;
   }
 }
 
-// ═══════════════════════════
-//  TOAST
-// ═══════════════════════════
+// ─── Toast ───
 .toast {
   display: flex;
   align-items: center;
   gap: 0.55rem;
   padding: 0.8rem 1.125rem;
-  border-radius: $radius-md;
+  border-radius: v.$radius-md;
   font-size: 0.8rem;
   font-weight: 500;
   margin-top: 1.25rem;
   animation: slideUp 0.3s ease;
 
   &--success {
-    background: $success-bg;
-    color: darken($success, 15%);
-    border: 1px solid rgba($success, 0.18);
+    background: v.$success-bg;
+    color: darken(v.$success, 15%);
+    border: 1px solid rgba(v.$success, 0.18);
   }
 
   &--error {
-    background: $error-bg;
-    color: darken($error, 8%);
-    border: 1px solid rgba($error, 0.18);
+    background: v.$error-bg;
+    color: darken(v.$error, 8%);
+    border: 1px solid rgba(v.$error, 0.18);
   }
 }
 
-// ═══════════════════════════
-//  ANIMATIONS
-// ═══════════════════════════
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes slideDown {
-  from { opacity: 0; transform: translateY(-10px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-// ═══════════════════════════
-//  RESPONSIVE
-// ═══════════════════════════
-
+// ─── Responsive ───
 @media (max-width: 1024px) {
   .usuarios { padding: 1.75rem 1.5rem 2.5rem; }
 }
@@ -724,7 +646,6 @@ svg[class*="icon-"] {
     .btn { width: 100%; }
   }
 
-  // Swap tabla → cards
   .table-wrap { display: none; }
   .mobile-list { display: block; }
 

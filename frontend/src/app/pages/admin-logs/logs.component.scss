@@ -1,61 +1,8 @@
-// ─── Paleta ───
-$primary: #003f5c;
-$primary-hover: #005580;
-$secondary: #6c757d;
-$accent: #336699;
-$neutral-100: #f8f9fa;
-$neutral-150: #f1f3f5;
-$neutral-200: #e9ecef;
-$neutral-300: #dee2e6;
-$neutral-500: #adb5bd;
-$neutral-700: #495057;
-$neutral-900: #212529;
-$success: #28a745;
-$success-bg: #ecf8ee;
-$error: #dc3545;
-$error-bg: #fdecea;
-$warning: #fd7e14;
-$warning-bg: #fff8e1;
-$info: $accent;
-$info-bg: #e8f0f8;
-
-$radius-sm: 6px;
-$radius-md: 10px;
-$radius-lg: 14px;
-$shadow-card: 0 1px 4px rgba(0, 0, 0, 0.05), 0 2px 12px rgba(0, 0, 0, 0.03);
-$shadow-hover: 0 4px 20px rgba(0, 0, 0, 0.07);
-$ease: 0.2s ease;
+@use 'variables' as v;
 
 :host {
   display: block;
   width: 100%;
-}
-
-// ─── Icon utilities ───
-svg[class*='icon-'] {
-  display: inline-block;
-  vertical-align: middle;
-  flex-shrink: 0;
-}
-
-.icon-12 { width: 12px; height: 12px; }
-.icon-14 { width: 14px; height: 14px; }
-.icon-15 { width: 15px; height: 15px; }
-.icon-16 { width: 16px; height: 16px; }
-.icon-17 { width: 17px; height: 17px; }
-.icon-20 { width: 20px; height: 20px; }
-.icon-24 { width: 24px; height: 24px; }
-.icon-32 { width: 32px; height: 32px; }
-.icon-40 { width: 40px; height: 40px; }
-.icon-accent { color: $accent; }
-
-.spin {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
 }
 
 // ─── Container ───
@@ -66,9 +13,7 @@ svg[class*='icon-'] {
   animation: fadeIn 0.3s ease;
 }
 
-// ═══════════════════════════
-//  PAGE HEADER
-// ═══════════════════════════
+// ─── Page Header ───
 .page-header {
   display: flex;
   align-items: flex-start;
@@ -81,7 +26,7 @@ svg[class*='icon-'] {
     margin: 0;
     font-size: 1.5rem;
     font-weight: 800;
-    color: $neutral-900;
+    color: v.$neutral-900;
     letter-spacing: -0.025em;
     line-height: 1.25;
     display: flex;
@@ -92,7 +37,7 @@ svg[class*='icon-'] {
   &__desc {
     margin: 0.25rem 0 0;
     font-size: 0.84rem;
-    color: $secondary;
+    color: v.$secondary;
   }
 
   &__actions {
@@ -101,9 +46,7 @@ svg[class*='icon-'] {
   }
 }
 
-// ═══════════════════════════
-//  EMPTY STATE
-// ═══════════════════════════
+// ─── Empty State ───
 .empty-state {
   display: flex;
   flex-direction: column;
@@ -111,9 +54,9 @@ svg[class*='icon-'] {
   text-align: center;
   padding: 4.5rem 2rem;
   background: #fff;
-  border: 1px solid $neutral-200;
-  border-radius: $radius-lg;
-  box-shadow: $shadow-card;
+  border: 1px solid v.$neutral-200;
+  border-radius: v.$radius-lg;
+  box-shadow: v.$shadow-card;
 
   &__icon-wrap {
     display: flex;
@@ -122,8 +65,8 @@ svg[class*='icon-'] {
     width: 72px;
     height: 72px;
     border-radius: 50%;
-    background: $neutral-100;
-    color: $neutral-500;
+    background: v.$neutral-100;
+    color: v.$neutral-500;
     margin-bottom: 1.25rem;
   }
 
@@ -131,20 +74,18 @@ svg[class*='icon-'] {
     margin: 0 0 0.375rem;
     font-size: 1.05rem;
     font-weight: 700;
-    color: $neutral-900;
+    color: v.$neutral-900;
   }
 
   &__text {
     margin: 0;
     font-size: 0.875rem;
-    color: $secondary;
+    color: v.$secondary;
     max-width: 360px;
   }
 }
 
-// ═══════════════════════════
-//  TOOLBAR
-// ═══════════════════════════
+// ─── Toolbar ───
 .toolbar {
   display: flex;
   align-items: center;
@@ -165,26 +106,26 @@ svg[class*='icon-'] {
     left: 12px;
     width: 16px;
     height: 16px;
-    color: $neutral-500;
+    color: v.$neutral-500;
     pointer-events: none;
   }
 
   &__search-input {
     width: 100%;
     padding: 0.55rem 2.25rem 0.55rem 2.5rem;
-    border: 1px solid $neutral-300;
+    border: 1px solid v.$neutral-300;
     border-radius: 100px;
     background: #fff;
     font-size: 0.84rem;
-    color: $neutral-900;
+    color: v.$neutral-900;
     outline: none;
-    transition: all $ease;
+    transition: all v.$ease;
 
-    &::placeholder { color: $neutral-500; }
+    &::placeholder { color: v.$neutral-500; }
 
     &:focus {
-      border-color: $accent;
-      box-shadow: 0 0 0 3px rgba($accent, 0.1);
+      border-color: v.$accent;
+      box-shadow: 0 0 0 3px rgba(v.$accent, 0.1);
     }
   }
 
@@ -196,30 +137,28 @@ svg[class*='icon-'] {
     justify-content: center;
     width: 24px;
     height: 24px;
-    background: $neutral-150;
+    background: v.$neutral-150;
     border: none;
     border-radius: 50%;
-    color: $neutral-700;
+    color: v.$neutral-700;
     cursor: pointer;
-    transition: all $ease;
+    transition: all v.$ease;
 
     &:hover {
-      background: $neutral-300;
+      background: v.$neutral-300;
     }
   }
 }
 
-// ═══════════════════════════
-//  FILTERS PANEL
-// ═══════════════════════════
+// ─── Filters Panel ───
 .filters-panel {
   background: #fff;
-  border: 1px solid $neutral-200;
-  border-radius: $radius-lg;
+  border: 1px solid v.$neutral-200;
+  border-radius: v.$radius-lg;
   padding: 1.25rem 1.375rem;
   margin-bottom: 1rem;
   animation: slideDown 0.2s ease;
-  box-shadow: $shadow-card;
+  box-shadow: v.$shadow-card;
 
   &__grid {
     display: grid;
@@ -236,39 +175,35 @@ svg[class*='icon-'] {
   height: 18px;
   padding: 0 5px;
   border-radius: 100px;
-  background: $accent;
+  background: v.$accent;
   color: #fff;
   font-size: 0.625rem;
   font-weight: 700;
 }
 
-// ─── Results info ───
+// ─── Results Info ───
 .results-info {
   display: flex;
   align-items: center;
   gap: 0.375rem;
   margin-bottom: 0.75rem;
   font-size: 0.75rem;
-  color: $secondary;
+  color: v.$secondary;
 
   &__count { font-weight: 600; }
   &__filtered { font-style: italic; }
 }
 
-// ═══════════════════════════
-//  CARD (genérica)
-// ═══════════════════════════
+// ─── Card ───
 .card {
   background: #fff;
-  border: 1px solid $neutral-200;
-  border-radius: $radius-lg;
-  box-shadow: $shadow-card;
+  border: 1px solid v.$neutral-200;
+  border-radius: v.$radius-lg;
+  box-shadow: v.$shadow-card;
   overflow: hidden;
 }
 
-// ═══════════════════════════
-//  LOG ENTRIES
-// ═══════════════════════════
+// ─── Log Entries ───
 .logs-list {
   display: flex;
   flex-direction: column;
@@ -277,37 +212,35 @@ svg[class*='icon-'] {
 
 .log-entry {
   background: #fff;
-  border: 1px solid $neutral-200;
-  border-radius: $radius-lg;
+  border: 1px solid v.$neutral-200;
+  border-radius: v.$radius-lg;
   overflow: hidden;
-  transition: all $ease;
+  transition: all v.$ease;
 
   &:hover {
-    border-color: $neutral-300;
-    box-shadow: $shadow-card;
+    border-color: v.$neutral-300;
+    box-shadow: v.$shadow-card;
   }
 
   &--expanded {
-    border-color: rgba($accent, 0.25);
-    box-shadow: 0 2px 12px rgba($accent, 0.06);
+    border-color: rgba(v.$accent, 0.25);
+    box-shadow: 0 2px 12px rgba(v.$accent, 0.06);
   }
 
-  // ─── Main row ───
   &__main {
     display: flex;
     align-items: center;
     gap: 0.875rem;
     padding: 0.875rem 1.25rem;
     cursor: pointer;
-    transition: background $ease;
+    transition: background v.$ease;
     user-select: none;
 
     &:hover {
-      background: $neutral-100;
+      background: v.$neutral-100;
     }
   }
 
-  // ─── Action icon circle ───
   &__action-icon {
     display: flex;
     align-items: center;
@@ -318,32 +251,31 @@ svg[class*='icon-'] {
     flex-shrink: 0;
 
     &--create {
-      background: $success-bg;
-      color: $success;
+      background: v.$success-bg;
+      color: v.$success;
     }
     &--update {
-      background: $info-bg;
-      color: $info;
+      background: v.$info-bg;
+      color: v.$info;
     }
     &--delete {
-      background: $error-bg;
-      color: $error;
+      background: v.$error-bg;
+      color: v.$error;
     }
     &--login {
-      background: rgba($primary, 0.06);
-      color: $primary;
+      background: rgba(v.$primary, 0.06);
+      color: v.$primary;
     }
     &--logout {
-      background: $neutral-150;
-      color: $secondary;
+      background: v.$neutral-150;
+      color: v.$secondary;
     }
     &--other {
-      background: $neutral-150;
-      color: $secondary;
+      background: v.$neutral-150;
+      color: v.$secondary;
     }
   }
 
-  // ─── Content ───
   &__content {
     flex: 1;
     min-width: 0;
@@ -353,7 +285,7 @@ svg[class*='icon-'] {
     margin: 0;
     font-size: 0.84rem;
     font-weight: 500;
-    color: $neutral-900;
+    color: v.$neutral-900;
     line-height: 1.4;
     white-space: nowrap;
     overflow: hidden;
@@ -373,10 +305,9 @@ svg[class*='icon-'] {
     align-items: center;
     gap: 0.25rem;
     font-size: 0.7rem;
-    color: $secondary;
+    color: v.$secondary;
   }
 
-  // ─── Badges ───
   &__badges {
     display: flex;
     align-items: center;
@@ -384,7 +315,6 @@ svg[class*='icon-'] {
     flex-shrink: 0;
   }
 
-  // ─── Expand button ───
   &__expand {
     display: flex;
     align-items: center;
@@ -394,27 +324,26 @@ svg[class*='icon-'] {
     border: none;
     border-radius: 8px;
     background: transparent;
-    color: $neutral-500;
+    color: v.$neutral-500;
     cursor: pointer;
     flex-shrink: 0;
-    transition: all $ease;
+    transition: all v.$ease;
 
     &:hover {
-      background: $neutral-150;
-      color: $neutral-900;
+      background: v.$neutral-150;
+      color: v.$neutral-900;
     }
   }
 
-  // ─── Expanded details ───
   &__details {
     padding: 0 1.25rem 1.25rem;
-    padding-left: calc(1.25rem + 36px + 0.875rem); // align with content
-    border-top: 1px dashed $neutral-200;
+    padding-left: calc(1.25rem + 36px + 0.875rem);
+    border-top: 1px dashed v.$neutral-200;
     animation: slideDown 0.2s ease;
   }
 }
 
-// ─── Action badge ───
+// ─── Action Badge ───
 .action-badge {
   display: inline-flex;
   align-items: center;
@@ -425,12 +354,12 @@ svg[class*='icon-'] {
   letter-spacing: 0.02em;
   white-space: nowrap;
 
-  &--create { background: $success-bg; color: darken($success, 10%); }
-  &--update { background: $info-bg; color: $accent; }
-  &--delete { background: $error-bg; color: $error; }
-  &--login { background: rgba($primary, 0.08); color: $primary; }
-  &--logout { background: $neutral-150; color: $secondary; }
-  &--other { background: $neutral-150; color: $secondary; }
+  &--create { background: v.$success-bg; color: darken(v.$success, 10%); }
+  &--update { background: v.$info-bg; color: v.$info; }
+  &--delete { background: v.$error-bg; color: v.$error; }
+  &--login { background: rgba(v.$primary, 0.08); color: v.$primary; }
+  &--logout { background: v.$neutral-150; color: v.$secondary; }
+  &--other { background: v.$neutral-150; color: v.$secondary; }
 }
 
 .resource-badge {
@@ -440,14 +369,12 @@ svg[class*='icon-'] {
   border-radius: 100px;
   font-size: 0.625rem;
   font-weight: 600;
-  background: $neutral-150;
-  color: $neutral-700;
+  background: v.$neutral-150;
+  color: v.$neutral-700;
   white-space: nowrap;
 }
 
-// ═══════════════════════════
-//  DETAIL GRID
-// ═══════════════════════════
+// ─── Detail Grid ───
 .detail-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -468,12 +395,12 @@ svg[class*='icon-'] {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: $secondary;
+    color: v.$secondary;
   }
 
   &__value {
     font-size: 0.8rem;
-    color: $neutral-900;
+    color: v.$neutral-900;
 
     &--mono {
       font-family: 'SF Mono', 'Fira Code', monospace;
@@ -486,12 +413,12 @@ svg[class*='icon-'] {
       text-overflow: ellipsis;
       max-width: 350px;
       font-size: 0.725rem;
-      color: $secondary;
+      color: v.$secondary;
     }
   }
 
   &__sub {
-    color: $secondary;
+    color: v.$secondary;
     font-size: 0.725rem;
   }
 }
@@ -503,7 +430,7 @@ svg[class*='icon-'] {
   gap: 0.5rem;
   margin-top: 1rem;
   padding-top: 0.75rem;
-  border-top: 1px dashed $neutral-200;
+  border-top: 1px dashed v.$neutral-200;
 
   &__label {
     display: flex;
@@ -513,7 +440,7 @@ svg[class*='icon-'] {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: $secondary;
+    color: v.$secondary;
     white-space: nowrap;
   }
 
@@ -529,19 +456,17 @@ svg[class*='icon-'] {
   align-items: center;
   padding: 0.15rem 0.5rem;
   border-radius: 100px;
-  background: rgba($accent, 0.08);
-  color: $accent;
+  background: rgba(v.$accent, 0.08);
+  color: v.$accent;
   font-size: 0.65rem;
   font-weight: 600;
 }
 
-// ═══════════════════════════
-//  CHANGES TABLE
-// ═══════════════════════════
+// ─── Changes Table ───
 .changes-section {
   margin-top: 1rem;
   padding-top: 0.75rem;
-  border-top: 1px dashed $neutral-200;
+  border-top: 1px dashed v.$neutral-200;
 
   &__title {
     display: flex;
@@ -550,14 +475,14 @@ svg[class*='icon-'] {
     margin: 0 0 0.625rem;
     font-size: 0.75rem;
     font-weight: 700;
-    color: $neutral-900;
+    color: v.$neutral-900;
   }
 }
 
 .changes-table-wrap {
   overflow-x: auto;
-  border: 1px solid $neutral-200;
-  border-radius: $radius-md;
+  border: 1px solid v.$neutral-200;
+  border-radius: v.$radius-md;
 }
 
 .changes-table {
@@ -572,49 +497,47 @@ svg[class*='icon-'] {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: $secondary;
-    background: $neutral-100;
-    border-bottom: 1px solid $neutral-200;
+    color: v.$secondary;
+    background: v.$neutral-100;
+    border-bottom: 1px solid v.$neutral-200;
   }
 
   td {
     padding: 0.5rem 0.75rem;
     vertical-align: middle;
-    border-bottom: 1px solid $neutral-200;
+    border-bottom: 1px solid v.$neutral-200;
   }
 
   tbody tr:last-child td { border-bottom: none; }
 
   &__field {
     font-weight: 600;
-    color: $neutral-900;
+    color: v.$neutral-900;
     white-space: nowrap;
   }
 
   &__old {
-    color: $error;
-    background: rgba($error, 0.03);
+    color: v.$error;
+    background: rgba(v.$error, 0.03);
     text-decoration: line-through;
-    text-decoration-color: rgba($error, 0.4);
+    text-decoration-color: rgba(v.$error, 0.4);
   }
 
   &__new {
-    color: $success;
-    background: rgba($success, 0.03);
+    color: v.$success;
+    background: rgba(v.$success, 0.03);
     font-weight: 600;
   }
 }
 
-// ═══════════════════════════
-//  LOADING / EMPTY
-// ═══════════════════════════
+// ─── Loading & Empty ───
 .loading-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.75rem;
   padding: 3rem;
-  color: $secondary;
+  color: v.$secondary;
   font-size: 0.84rem;
 }
 
@@ -626,17 +549,15 @@ svg[class*='icon-'] {
   padding: 3rem;
   text-align: center;
 
-  &__icon { color: $neutral-500; }
+  &__icon { color: v.$neutral-500; }
 
   &__text {
-    color: $secondary;
+    color: v.$secondary;
     font-size: 0.84rem;
   }
 }
 
-// ═══════════════════════════
-//  PAGINATION
-// ═══════════════════════════
+// ─── Pagination ───
 .pagination {
   display: flex;
   align-items: center;
@@ -651,19 +572,19 @@ svg[class*='icon-'] {
     min-width: 34px;
     height: 34px;
     padding: 0 0.5rem;
-    border: 1px solid $neutral-300;
-    border-radius: $radius-md;
+    border: 1px solid v.$neutral-300;
+    border-radius: v.$radius-md;
     background: #fff;
-    color: $neutral-700;
+    color: v.$neutral-700;
     font-size: 0.8rem;
     font-weight: 500;
     cursor: pointer;
-    transition: all $ease;
+    transition: all v.$ease;
 
     &:hover:not(:disabled) {
-      background: $neutral-100;
-      border-color: $accent;
-      color: $accent;
+      background: v.$neutral-100;
+      border-color: v.$accent;
+      color: v.$accent;
     }
 
     &:disabled {
@@ -672,13 +593,13 @@ svg[class*='icon-'] {
     }
 
     &--active {
-      background: $primary;
-      border-color: $primary;
+      background: v.$primary;
+      border-color: v.$primary;
       color: #fff;
 
       &:hover {
-        background: $primary-hover !important;
-        border-color: $primary-hover !important;
+        background: v.$primary-hover !important;
+        border-color: v.$primary-hover !important;
         color: #fff !important;
       }
     }
@@ -687,14 +608,12 @@ svg[class*='icon-'] {
   &__info {
     margin-left: 0.75rem;
     font-size: 0.725rem;
-    color: $secondary;
+    color: v.$secondary;
     white-space: nowrap;
   }
 }
 
-// ═══════════════════════════
-//  FORM
-// ═══════════════════════════
+// ─── Form ───
 .form-group {
   display: flex;
   flex-direction: column;
@@ -704,25 +623,25 @@ svg[class*='icon-'] {
 .form-label {
   font-size: 0.75rem;
   font-weight: 600;
-  color: $neutral-700;
+  color: v.$neutral-700;
 }
 
 .form-input,
 .form-select {
-  border: 1px solid $neutral-300;
-  border-radius: $radius-md;
+  border: 1px solid v.$neutral-300;
+  border-radius: v.$radius-md;
   padding: 0.5rem 0.75rem;
   font-size: 0.8rem;
-  color: $neutral-900;
+  color: v.$neutral-900;
   background: #fff;
   outline: none;
-  transition: all $ease;
+  transition: all v.$ease;
 
-  &::placeholder { color: $neutral-500; }
+  &::placeholder { color: v.$neutral-500; }
 
   &:focus {
-    border-color: $accent;
-    box-shadow: 0 0 0 3px rgba($accent, 0.1);
+    border-color: v.$accent;
+    box-shadow: 0 0 0 3px rgba(v.$accent, 0.1);
   }
 }
 
@@ -735,9 +654,7 @@ svg[class*='icon-'] {
   cursor: pointer;
 }
 
-// ═══════════════════════════
-//  BUTTONS
-// ═══════════════════════════
+// ─── Buttons ───
 .btn {
   display: inline-flex;
   align-items: center;
@@ -747,28 +664,28 @@ svg[class*='icon-'] {
   font-size: 0.8rem;
   font-weight: 600;
   border: none;
-  border-radius: $radius-md;
+  border-radius: v.$radius-md;
   cursor: pointer;
   white-space: nowrap;
-  transition: all $ease;
+  transition: all v.$ease;
 
   &--primary {
-    background: $primary;
+    background: v.$primary;
     color: #fff;
-    &:hover:not(:disabled) { background: $primary-hover; }
+    &:hover:not(:disabled) { background: v.$primary-hover; }
     &:disabled { opacity: 0.4; cursor: not-allowed; }
   }
 
   &--ghost {
     background: #fff;
-    color: $secondary;
-    border: 1px solid $neutral-300;
-    &:hover { background: $neutral-150; border-color: $neutral-500; }
+    color: v.$secondary;
+    border: 1px solid v.$neutral-300;
+    &:hover { background: v.$neutral-150; border-color: v.$neutral-500; }
   }
 
   &--link {
     background: none;
-    color: $error;
+    color: v.$error;
     padding: 0.375rem 0;
     font-size: 0.75rem;
     &:hover { text-decoration: underline; }
@@ -783,60 +700,38 @@ svg[class*='icon-'] {
   }
 
   &--active {
-    border-color: $accent;
-    color: $accent;
-    background: rgba($accent, 0.04);
+    border-color: v.$accent;
+    color: v.$accent;
+    background: rgba(v.$accent, 0.04);
   }
 }
 
-// ═══════════════════════════
-//  TOAST
-// ═══════════════════════════
+// ─── Toast ───
 .toast {
   display: flex;
   align-items: center;
   gap: 0.55rem;
   padding: 0.8rem 1.125rem;
-  border-radius: $radius-md;
+  border-radius: v.$radius-md;
   font-size: 0.8rem;
   font-weight: 500;
   margin-top: 1.25rem;
   animation: slideUp 0.3s ease;
 
   &--success {
-    background: $success-bg;
-    color: darken($success, 15%);
-    border: 1px solid rgba($success, 0.18);
+    background: v.$success-bg;
+    color: darken(v.$success, 15%);
+    border: 1px solid rgba(v.$success, 0.18);
   }
 
   &--error {
-    background: $error-bg;
-    color: darken($error, 8%);
-    border: 1px solid rgba($error, 0.18);
+    background: v.$error-bg;
+    color: darken(v.$error, 8%);
+    border: 1px solid rgba(v.$error, 0.18);
   }
 }
 
-// ═══════════════════════════
-//  ANIMATIONS
-// ═══════════════════════════
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes slideDown {
-  from { opacity: 0; transform: translateY(-10px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-// ═══════════════════════════
-//  RESPONSIVE
-// ═══════════════════════════
+// ─── Responsive ───
 @media (max-width: 1024px) {
   .logs { padding: 1.75rem 1.5rem 2.5rem; }
 
@@ -870,11 +765,11 @@ svg[class*='icon-'] {
   }
 
   .log-entry__badges {
-    display: none; // ocultar en tablet, mostrar en expanded
+    display: none;
   }
 
   .log-entry__details {
-    padding-left: 1.25rem; // sin offset en mobile
+    padding-left: 1.25rem;
   }
 
   .detail-grid {
@@ -932,7 +827,7 @@ svg[class*='icon-'] {
   }
 
   .log-entry__expand {
-    display: none; // tap en toda la fila en mobile
+    display: none;
   }
 
   .log-entry__details {
@@ -945,7 +840,6 @@ svg[class*='icon-'] {
     th, td { padding: 0.375rem 0.5rem; }
   }
 
-  // Mostrar badges inline en detalle expandido
   .log-entry--expanded .log-entry__badges {
     display: flex;
   }
@@ -953,7 +847,7 @@ svg[class*='icon-'] {
   .form-input,
   .form-select,
   .toolbar__search-input {
-    font-size: 1rem; // evitar zoom iOS
+    font-size: 1rem;
   }
 }
 

@@ -1,0 +1,43 @@
+// ═══════════════════════════════════════════
+//  DESIGN TOKENS — Variables globales
+// ═══════════════════════════════════════════
+
+// ─── Paleta principal ───
+$primary:       #003f5c;
+$primary-hover: #005580;
+$secondary:     #6c757d;
+$accent:        #336699;
+
+// ─── Neutros ───
+$neutral-100: #f8f9fa;
+$neutral-150: #f1f3f5;
+$neutral-200: #e9ecef;
+$neutral-300: #dee2e6;
+$neutral-500: #adb5bd;
+$neutral-700: #495057;
+$neutral-900: #212529;
+
+// ─── Semánticos ───
+$success:    #28a745;
+$success-bg: #ecf8ee;
+
+$error:    #dc3545;
+$error-bg: #fdecea;
+
+$warning:    #fd7e14;
+$warning-bg: #fff3e0;
+
+$info:    #5b8fb9;
+$info-bg: #edf4f8;
+
+// ─── Bordes ───
+$radius-sm: 6px;
+$radius-md: 10px;
+$radius-lg: 14px;
+
+// ─── Sombras ───
+$shadow-card:  0 1px 4px rgba(0, 0, 0, 0.05), 0 2px 12px rgba(0, 0, 0, 0.03);
+$shadow-hover: 0 4px 20px rgba(0, 0, 0, 0.07);
+
+// ─── Transiciones ───
+$ease: 0.2s ease;
