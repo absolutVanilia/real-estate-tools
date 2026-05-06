@@ -1,0 +1,80 @@
+@use 'variables' as v;
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+
+  // ─── Variante inline: dentro de un card existente (listas vacías) ───
+  &--inline {
+    gap: 0.5rem;
+    padding: 3rem;
+
+    .empty-state__icon-wrap {
+      color: v.$neutral-500;
+      line-height: 0;
+    }
+
+    .empty-state__title {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 700;
+      color: v.$neutral-900;
+    }
+
+    .empty-state__text {
+      margin: 0;
+      color: v.$secondary;
+      font-size: 0.84rem;
+      max-width: 320px;
+    }
+  }
+
+  // ─── Variante prominent: standalone, acceso restringido ───
+  &--prominent {
+    padding: 4.5rem 2rem;
+    background: #fff;
+    border: 1px solid v.$neutral-200;
+    border-radius: v.$radius-lg;
+    box-shadow: v.$shadow-card;
+
+    .empty-state__icon-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: v.$neutral-100;
+      color: v.$neutral-500;
+      margin-bottom: 0.75rem;
+    }
+
+    .empty-state__title {
+      margin: 0 0 0.375rem;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: v.$neutral-900;
+    }
+
+    .empty-state__text {
+      margin: 0;
+      font-size: 0.875rem;
+      color: v.$secondary;
+      max-width: 360px;
+    }
+  }
+
+  // ─── Slot de acciones ───
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+
+    &:empty {
+      display: none;
+    }
+  }
+}

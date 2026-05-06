@@ -18,13 +18,13 @@
 
   <!-- Sin permisos -->
   @if (!isPlatformAdmin()) {
-    <div class="empty-state">
-      <div class="empty-state__icon-wrap">
-        <svg lucideLock class="icon-40"></svg>
-      </div>
-      <h3 class="empty-state__title">Acceso restringido</h3>
-      <p class="empty-state__text">Solo el administrador de plataforma puede gestionar compañías.</p>
-    </div>
+    <app-empty-state
+      appearance="prominent"
+      title="Acceso restringido"
+      message="Solo el administrador de plataforma puede gestionar compañías."
+    >
+      <svg lucideLock icon class="icon-40"></svg>
+    </app-empty-state>
   } @else {
 
     <!-- Formulario -->
@@ -83,9 +83,7 @@
 
       <!-- Loading -->
       @if (isLoading()) {
-        <div class="table-empty">
-          <p>Cargando compañías...</p>
-        </div>
+        <app-loading-state message="Cargando compañías..." />
       }
 
       <!-- Tabla desktop -->

@@ -13,45 +13,6 @@
   animation: fadeIn 0.3s ease;
 }
 
-// ─── Empty State ───
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 4.5rem 2rem;
-  background: #fff;
-  border: 1px solid v.$neutral-200;
-  border-radius: v.$radius-lg;
-  box-shadow: v.$shadow-card;
-
-  &__icon-wrap {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 72px;
-    height: 72px;
-    border-radius: 50%;
-    background: v.$neutral-100;
-    color: v.$neutral-500;
-    margin-bottom: 1.25rem;
-  }
-
-  &__title {
-    margin: 0 0 0.375rem;
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: v.$neutral-900;
-  }
-
-  &__text {
-    margin: 0;
-    font-size: 0.875rem;
-    color: v.$secondary;
-    max-width: 360px;
-  }
-}
-
 // ─── Toolbar ───
 .toolbar {
   display: flex;
@@ -494,33 +455,6 @@
     color: v.$success;
     background: rgba(v.$success, 0.03);
     font-weight: 600;
-  }
-}
-
-// ─── Loading & Empty ───
-.loading-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 3rem;
-  color: v.$secondary;
-  font-size: 0.84rem;
-}
-
-.empty-list {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 3rem;
-  text-align: center;
-
-  &__icon { color: v.$neutral-500; }
-
-  &__text {
-    color: v.$secondary;
-    font-size: 0.84rem;
   }
 }
 

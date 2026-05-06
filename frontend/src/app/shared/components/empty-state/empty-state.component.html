@@ -1,0 +1,23 @@
+<div
+  class="empty-state"
+  [class.empty-state--inline]="appearance === 'inline'"
+  [class.empty-state--prominent]="appearance === 'prominent'"
+>
+  <!-- Ícono -->
+  <div class="empty-state__icon-wrap">
+    <ng-content select="[icon]"></ng-content>
+  </div>
+
+  <!-- Título (opcional) -->
+  @if (title) {
+    <h3 class="empty-state__title">{{ title }}</h3>
+  }
+
+  <!-- Mensaje -->
+  <p class="empty-state__text">{{ message }}</p>
+
+  <!-- Acciones (botones, links, etc.) -->
+  <div class="empty-state__actions">
+    <ng-content></ng-content>
+  </div>
+</div>

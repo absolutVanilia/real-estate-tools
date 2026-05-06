@@ -201,10 +201,7 @@
     <!-- Loading -->
     @if (isLoading()) {
       <div class="card">
-        <div class="loading-state">
-          <svg lucideRefreshCw class="icon-20 spin"></svg>
-          <p>Cargando propietarios...</p>
-        </div>
+        <app-loading-state message="Cargando propietarios..." />
       </div>
     }
   
@@ -341,16 +338,14 @@
         <!-- Empty -->
         @if (owners().length === 0) {
           <div class="card">
-            <div class="empty-list">
-              <svg lucideUsers class="icon-40 empty-list__icon"></svg>
-              <h3 class="empty-list__title">No hay propietarios</h3>
-              <p class="empty-list__text">
-                @if (searchTerm() || activeFiltersCount() > 0) {
-                  No se encontraron propietarios con los filtros aplicados.
-                } @else {
-                  Aún no se han registrado propietarios. ¡Registra el primero!
-                }
-              </p>
+            <app-empty-state
+              title="No hay propietarios"
+              [message]="searchTerm() || activeFiltersCount() > 0
+                ? 'No se encontraron propietarios con los filtros aplicados.'
+                : 'Aún no se han registrado propietarios. ¡Registra el primero!'"
+            >
+              <svg lucideUsers icon class="icon-40"></svg>
+        
               @if (searchTerm() || activeFiltersCount() > 0) {
                 <button class="btn btn--ghost btn--sm" (click)="clearFilters()">Limpiar filtros</button>
               } @else {
@@ -359,7 +354,7 @@
                   Nuevo propietario
                 </button>
               }
-            </div>
+            </app-empty-state>
           </div>
         }
       </div>

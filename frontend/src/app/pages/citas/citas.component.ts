@@ -10,6 +10,8 @@ import {
 import { AuthService } from '../../services/auth.service';
 import { ToastService } from '../../shared/components/toast';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
+import { LoadingStateComponent } from '../../shared/components/loading-state/loading-state.component';
+import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 
 import {
   LucideCalendarDays,
@@ -42,6 +44,8 @@ import {
   selector: 'app-citas',
   standalone: true,
   imports: [
+    LoadingStateComponent,
+    EmptyStateComponent,
     PageHeaderComponent,
     CommonModule,
     ReactiveFormsModule,

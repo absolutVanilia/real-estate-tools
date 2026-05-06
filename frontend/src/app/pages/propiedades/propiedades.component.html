@@ -729,15 +729,10 @@
       </div>
     }
   
-    <!-- ═══════════════════════════════════ -->
-    <!--  LOADING                           -->
-    <!-- ═══════════════════════════════════ -->
+    <!-- Loading -->
     @if (isLoading()) {
       <div class="card">
-        <div class="loading-state">
-          <svg lucideRefreshCw class="icon-20 spin"></svg>
-          <p>Cargando propiedades...</p>
-        </div>
+        <app-loading-state message="Cargando propiedades..." />
       </div>
     }
   
@@ -1054,16 +1049,14 @@
         <!-- Empty -->
         @if (properties().length === 0) {
           <div class="card">
-            <div class="empty-list">
-              <svg lucideHome class="icon-40 empty-list__icon"></svg>
-              <h3 class="empty-list__title">No hay propiedades</h3>
-              <p class="empty-list__text">
-                @if (searchTerm() || activeFiltersCount() > 0) {
-                  No se encontraron propiedades con los filtros aplicados.
-                } @else {
-                  Aún no se han registrado propiedades. ¡Registra la primera!
-                }
-              </p>
+            <app-empty-state
+              title="No hay propiedades"
+              [message]="searchTerm() || activeFiltersCount() > 0
+                ? 'No se encontraron propiedades con los filtros aplicados.'
+                : 'Aún no se han registrado propiedades. ¡Registra la primera!'"
+            >
+              <svg lucideHome icon class="icon-40"></svg>
+        
               @if (searchTerm() || activeFiltersCount() > 0) {
                 <button class="btn btn--ghost btn--sm" (click)="clearFilters()">
                   Limpiar filtros
@@ -1074,7 +1067,7 @@
                   Nueva propiedad
                 </button>
               }
-            </div>
+            </app-empty-state>
           </div>
         }
       </div>
